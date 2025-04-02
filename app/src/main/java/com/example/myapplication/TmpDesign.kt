@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
@@ -35,6 +36,9 @@ import androidx.compose.ui.unit.sp
 
 // MVVM에 자세한 내용은 아래 URL을 참조해주세요.
 // https://goharry.tistory.com/55
+
+
+
 
 
 @Composable
@@ -62,6 +66,8 @@ fun TmpDesign(
 }
 
 
+
+
 // 앱 이름
 @Composable
 fun Title(){
@@ -77,57 +83,33 @@ fun Title(){
 
 // 파일 박스(리스트)
 @Composable
-fun FileList(
-    viewModel: TmpDesignViewModel
-){
-    // 화면 스크롤 state 저장 변수
-    val scrollState = rememberScrollState()
-    // do not use lazy row, it cause strange error
-    Column(
-        modifier = Modifier
-            .verticalScroll(scrollState)
-    ){
-        val fileData by viewModel.fileData.collectAsState()
+fun FileList(viewModel: TmpDesignViewModel) {
+    val fileData by viewModel.fileDataLiveData.observeAsState(emptyList())
+
+    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
         Column(
             modifier = Modifier
-                .border(
-                    width = 1.dp,
-                    color = Color.LightGray,
-                    shape = RectangleShape
-                )
+                .border(1.dp, Color.LightGray, RectangleShape)
                 .fillMaxWidth()
-        ){
+        ) {
             Row {
-                Column(){
-                    Text(
-                        text = "파일이름",
-                        modifier = Modifier.padding(10.dp)
-                    )
-                    // fileData의 값을 하나씩 갖고 와서 for문 느낌으로 뿌려줍니다.
-                    fileData.forEachIndexed { index, tmpDesignData ->
-                            Text(
-                                text = tmpDesignData.fileName,
-                                modifier = Modifier.padding(10.dp)
-                            )
+                Column {
+                    Text(text = "파일이름", modifier = Modifier.padding(10.dp))
+                    fileData.forEach { data ->
+                        Text(text = data.fileName, modifier = Modifier.padding(10.dp))
                     }
                 }
-                Column(){
-                    Text(
-                        text = "파일크기",
-                        modifier = Modifier.padding(10.dp)
-                    )
-                    // fileData의 값을 하나씩 갖고 와서 for문 느낌으로 뿌려줍니다.
-                    fileData.forEachIndexed { index, tmpDesignData ->
-                        Text(
-                            text = "${tmpDesignData.size} Byte",
-                            modifier = Modifier.padding(10.dp)
-                        )
+                Column {
+                    Text(text = "파일크기", modifier = Modifier.padding(10.dp))
+                    fileData.forEach { data ->
+                        Text(text = "${data.size} Byte", modifier = Modifier.padding(10.dp))
                     }
                 }
             }
         }
     }
 }
+
 
 // 버튼123 개별
 @Composable
