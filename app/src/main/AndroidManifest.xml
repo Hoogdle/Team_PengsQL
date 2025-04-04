@@ -35,6 +35,17 @@
             android:name=".ed.L4.EditorMainActivity"
             android:exported="false"
             android:theme="@style/Theme.VEPT" />
+
+        <activity
+            android:name=".ed.L4.EditorMainActivity"
+            android:exported="false"
+            android:theme="@style/Theme.VEPT" />
+
+        <activity
+            android:name=".ed.L4.EditorShowListActivity"
+            android:exported="false"
+            android:theme="@style/Theme.VEPT" />
+
     </application>
 
 </manifest>
