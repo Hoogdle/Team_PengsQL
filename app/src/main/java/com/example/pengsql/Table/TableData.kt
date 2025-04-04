@@ -48,7 +48,7 @@ package com.example.pengsql.Table
 //)
 //
 val columnsTableData = listOf("Field Name", "Data Type", "NN", "PK", "AI", "U", "Default Value", "Collation", "Foreign Key")
-val sample1 = listOf("Hi","String","true","true","false","true","hello","what","is it")
+val sample1 = listOf("Hi","String","true","true","false","true","hellohellohellohellohellohello","whathellohello","ishellohellohello ithellohellohellohellohellohello")
 
 val tableDataSamples = listOf(columnsTableData,sample1, sample1, sample1,sample1,sample1,sample1,sample1,sample1, sample1, sample1,sample1,sample1,sample1,sample1)
 //val sampleTableData = listOf(tableSample1, tableSample2, tableSample3)
