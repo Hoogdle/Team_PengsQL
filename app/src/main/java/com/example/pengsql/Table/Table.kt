@@ -93,6 +93,10 @@ fun TableTitle(
 
 // lazy는 기본적으로 무한한 height를 가정하므로, lazy안에 lazy를 넣으면 에러 발생..
 // => lazy에 모두 다 넣어버리기 => 스파게티 코드...
+
+// 1. List<List<String>> => List<String>
+// 2. put the result of '1' to LazyGrid
+// 3. 변수 하나를 두고 9개가 이후에는 박스 텍스트 대신 박스가 출려되도록 카운트
 @Composable
 fun TableFirstRow(){
     val verticalScrollState = rememberScrollState()
