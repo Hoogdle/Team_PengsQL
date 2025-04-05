@@ -1,6 +1,8 @@
 package com.example.pengsql.DBTable
 
+import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -49,6 +51,11 @@ import com.example.pengsql.SelectDB.triggerChild
 import com.example.pengsql.SelectDB.triggerChildOfChild
 import com.example.pengsql.SelectDB.viewChild
 import com.example.pengsql.SelectDB.viewChildOfChild
+import com.example.pengsql.Table.TableDropDown
+import com.example.pengsql.Table.TableMarker
+import com.example.pengsql.Table.TableText
+import com.example.pengsql.Table.VerticalDividers
+import com.example.pengsql.Table.dropDownSample
 import com.example.pengsql.ui.theme.BackGroundColor
 import com.example.pengsql.ui.theme.TableBackGroundColor
 import com.example.pengsql.ui.theme.TextColor
@@ -77,7 +84,7 @@ fun DBTable(
             DBTableTextField()
 
         }
-        DBTableTemplate()
+        DBTableTemplate(dbTableSample)
     }
 }
 
@@ -137,7 +144,9 @@ fun DBTableTextField(){
 
 
 @Composable
-fun DBTableTemplate(){
+fun DBTableTemplate(
+    data: List<List<String>>
+){
     val verticalScrollState = rememberScrollState()
     val horizontalScrollState = rememberScrollState()
     val tmpColumn: MutableList<String> = mutableListOf()
@@ -154,8 +163,64 @@ fun DBTableTemplate(){
             end = 30.dp,
         )
         .verticalScroll(verticalScrollState)
+        .horizontalScroll(horizontalScrollState)
     ) {
+        for (i in 0..8){
+            data.forEachIndexed { index, item ->
+                tmpColumn.add(item[i])
+            }
+        }
+        tmpColumn.forEachIndexed { index, item ->
+            tmpOneColumn.add(item)
+            if( (index+1)%data.size == 0){
+                DBTableText(tmpOneColumn)
 
+                // 세로선
+                Box(
+                    modifier = Modifier.height((37*data.size).dp)
+                ){
+                    // 마지막 테이블 세로선 삭제
+                    if(index+1 != tmpColumn.size){
+                        VerticalDividers(
+                            modifier = Modifier.fillMaxHeight(),
+                            thickness = 1.dp,
+                            color = Color.LightGray
+                        )
+                    }
+                }
+                tmpOneColumn.clear()
+            }
+        }
     }
+}
+
+@Composable
+fun DBTableNumber(){
+
+}
+
+@Composable
+fun DBTableId(
+    dataList: List<String>
+){
+
+}
+@Composable
+fun DBTableText(
+    dataList: List<String>
+){
+
+}
+
+
+// 데이터 넘버링 생성기
+fun DBTableNumberGenerator(
+    start: Int
+) : MutableList<Int> {
+    val numberList:MutableList<Int> = mutableListOf()
+    for(i in start until start+50){
+        numberList.add(i)
+    }
+    return numberList
 }
 
