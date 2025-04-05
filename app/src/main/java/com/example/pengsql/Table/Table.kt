@@ -59,6 +59,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.navigation.NavController
+import androidx.navigation.NavDestination
+import androidx.navigation.compose.rememberNavController
 import com.example.pengsql.Others.ArrowAndMenu
 import com.example.pengsql.R
 import com.example.pengsql.ui.theme.BackGroundColor
@@ -69,6 +72,9 @@ import com.example.pengsql.ui.theme.GreenBox
 import com.example.pengsql.ui.theme.TableBackGroundColor
 import com.example.pengsql.ui.theme.TextColor
 import com.example.pengsql.ui.theme.TitleColor
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import com.example.pengsql.SelectDB.SelectDB
 
 
 // =========================================================READ ME=========================================================
@@ -84,8 +90,13 @@ import com.example.pengsql.ui.theme.TitleColor
 // 이 사항은 추후에 상의하는게 좋을 거 같습니다.
 // =========================================================READ ME=========================================================
 
+
+
+
 @Composable
-fun Table(){
+fun Table(
+    navController: NavController
+){
     Column (
         Modifier
             .background(BackGroundColor)
@@ -101,6 +112,13 @@ fun Table(){
             horizontalArrangement = Arrangement.SpaceBetween
         ){
             TableTitle("Table Name")
+            TableButton(
+                text = "DB선택",
+                // navController와 nav의 목적지 등록
+                // 500 번째 줄로 가서 쓰임새를 확인해주세요.
+                navController = navController,
+                navDestination = "selectDB"
+            )
             TableButtonPack()
         }
         TableTemplate(tableDataSamples)
@@ -465,7 +483,9 @@ fun TableMarker(
 
 @Composable
 fun TableButton(
-    text: String
+    text: String,
+    navController: NavController? = null,
+    navDestination: String? = null
 ){
     Button(
         contentPadding = PaddingValues(7.dp),
@@ -476,7 +496,13 @@ fun TableButton(
                 end = 1.dp
             )
         ,
-        onClick = {},
+        onClick = {
+            // null 확인
+            // 버튼 클릭시 등록한 화면으로 감
+            if(navController != null && navDestination != null){
+                navController.navigate(navDestination)
+            }
+        },
         colors = ButtonColors(
             contentColor = ButtonTextColor,
             containerColor = ButtonColor,

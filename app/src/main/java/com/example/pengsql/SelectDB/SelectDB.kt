@@ -46,6 +46,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.NavDestination
 import com.example.pengsql.Others.ArrowAndMenu
 import com.example.pengsql.R
 import com.example.pengsql.Table.TableButtonPack
@@ -65,7 +67,9 @@ import com.example.pengsql.ui.theme.TextColor
 import com.example.pengsql.ui.theme.TitleColor
 
 @Composable
-fun SelectDB(){
+fun SelectDB(
+    navController: NavController
+){
     Column (
         Modifier
             .background(BackGroundColor)
@@ -81,6 +85,11 @@ fun SelectDB(){
             horizontalArrangement = Arrangement.SpaceBetween
         ){
             SelectDBTitle("DB Name")
+            SelectDBButton(
+                text = "Table",
+                navController = navController,
+                navDestination = "table"
+            )
             SelectDBButtonPack()
         }
         SelectDBTemplate()
@@ -440,7 +449,9 @@ fun SelectDBParent(
 
 @Composable
 fun SelectDBButton(
-    text: String
+    text: String,
+    navController: NavController? = null,
+    navDestination: String? = null
 ){
     Button(
         contentPadding = PaddingValues(7.dp),
@@ -451,7 +462,13 @@ fun SelectDBButton(
                 end = 1.dp
             )
         ,
-        onClick = {},
+        onClick = {
+            // null 확인
+            // 버튼 클릭시 등록한 화면으로 감
+            if(navController != null && navDestination != null){
+                navController.navigate(navDestination)
+            }
+        },
         colors = ButtonColors(
             contentColor = ButtonTextColor,
             containerColor = ButtonColor,
