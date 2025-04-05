@@ -119,6 +119,13 @@ fun Table(
                 navController = navController,
                 navDestination = "selectDB"
             )
+            TableButton(
+                text = "DBTable",
+                // navController와 nav의 목적지 등록
+                // 500 번째 줄로 가서 쓰임새를 확인해주세요.
+                navController = navController,
+                navDestination = "dbTable"
+            )
             TableButtonPack()
         }
         TableTemplate(tableDataSamples)

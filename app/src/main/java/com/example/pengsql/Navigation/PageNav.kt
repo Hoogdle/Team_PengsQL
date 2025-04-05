@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.pengsql.DBTable.DBTable
 import com.example.pengsql.SelectDB.SelectDB
 import com.example.pengsql.Table.Table
 
@@ -25,9 +26,10 @@ fun PageNav(){
 
     // 'Table.kt' 파일의 118번 째줄로 가시면 주석으로 사용 흐름을 정리했습니다. 천천히 따라가주세여.
     Column {
-        NavHost(navController = navController, startDestination = "table"){
+        NavHost(navController = navController, startDestination = "dbTable"){
             composable("table") { Table(navController = navController) }
             composable("selectDB") { SelectDB(navController = navController) }
+            composable("dbTable") { DBTable(navController = navController) }
         }
     }
 }

@@ -90,6 +90,11 @@ fun SelectDB(
                 navController = navController,
                 navDestination = "table"
             )
+            SelectDBButton(
+                text = "DBTable",
+                navController = navController,
+                navDestination = "dbTable"
+            )
             SelectDBButtonPack()
         }
         SelectDBTemplate()
