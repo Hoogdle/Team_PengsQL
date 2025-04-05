@@ -112,17 +112,18 @@ fun Table(){
 fun TableTitle(
     text: String
 ){
-
-    Text(
-        modifier = Modifier
-            .padding(start = 45.dp),
-        text = text,
-        style = TextStyle(
-            color = TitleColor,
-            fontFamily = FontFamily(Font(R.font.roboto_bold)),
-            fontSize = 28.sp
+    Column {
+        Text(
+            modifier = Modifier
+                .padding(start = 45.dp),
+            text = text,
+            style = TextStyle(
+                color = TitleColor,
+                fontFamily = FontFamily(Font(R.font.roboto_bold)),
+                fontSize = 28.sp
+            )
         )
-    )
+    }
 }
 
 
