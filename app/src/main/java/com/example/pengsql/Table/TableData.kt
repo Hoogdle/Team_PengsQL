@@ -51,4 +51,5 @@ val columnsTableData = listOf("Field Name", "Data Type", "NN", "PK", "AI", "U", 
 val sample1 = listOf("Hi","String","true","true","false","true","hellohellohellohellohellohello","whathellohello","ishellohellohello ithellohellohellohellohellohello")
 
 val tableDataSamples = listOf(columnsTableData,sample1, sample1, sample1,sample1,sample1,sample1,sample1,sample1, sample1, sample1,sample1,sample1,sample1,sample1)
+val dropDownSample = listOf("apple","banana","mango","orange","watermelon")
 //val sampleTableData = listOf(tableSample1, tableSample2, tableSample3)
