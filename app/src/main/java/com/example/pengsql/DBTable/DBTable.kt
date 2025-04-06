@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -38,6 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.integerResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -83,8 +85,8 @@ fun DBTable(
     navController: NavController
 ){
     val dbTableSample = remember{ mutableStateOf(dbTableSample1)}
-    val currentPage = remember { mutableStateOf(1) }
-    val maximumPage = remember { mutableStateOf(7) } // 임의로 정한 maximum page, 나중에는 실제 DB 데이터 개수에 따른 페이지만큼 초기화 필요
+    val currentPage = remember { mutableStateOf("1") }
+    val maximumPage = remember { mutableStateOf("7") } // 임의로 정한 maximum page, 나중에는 실제 DB 데이터 개수에 따른 페이지만큼 초기화 필요
 
     Column (
         Modifier
@@ -107,19 +109,10 @@ fun DBTable(
 
         }
 
-        DBTableTemplate(dbTableSample)
-    }
-    Box(
-        modifier = Modifier
-            .offset(
-                x = 250.dp,
-                y = 350.dp
-            )
-    ){
-        DBTableArrowPack(
+        DBTableTemplate(
+            data = dbTableSample,
             currentPage = currentPage,
-            maximumPage = maximumPage,
-            dbTableSample = dbTableSample
+            maximumPage = maximumPage
         )
     }
 }
@@ -181,7 +174,9 @@ fun DBTableTextField(){
 
 @Composable
 fun DBTableTemplate(
-    data: MutableState<MutableList<List<String>>>
+    data: MutableState<MutableList<List<String>>>,
+    currentPage: MutableState<String>,
+    maximumPage: MutableState<String>
 ){
     val verticalScrollState = rememberScrollState()
     val horizontalScrollState = rememberScrollState()
@@ -190,70 +185,79 @@ fun DBTableTemplate(
     val startNum = remember { mutableStateOf(1) }
     lateinit var numList: MutableList<String>
 
-    Row (modifier = Modifier
-        .fillMaxWidth()
-        .fillMaxHeight()
-        .background(BackGroundColor)
-        .clip(shape = RoundedCornerShape(35.dp, 35.dp, 0.dp, 0.dp))
-        .background(TableBackGroundColor)
-        .padding(
-            start = 30.dp,
-            end = 30.dp,
-        )
-        .verticalScroll(verticalScrollState)
-        .horizontalScroll(horizontalScrollState)
-    ) {
-        // 주어진 header에 따라 나눠서 담기
-        // 행 기준 데이터를 열 기준으로 변환(화면에 출력할 때 밸런스를 맞추기 위해서 열 기준 출력이 필수적)
-        for (i in 0 until data.value[0].size){
-            data.value.forEachIndexed { index, item ->
-                tmpColumn.add(item[i])
-            }
-        }
-
-        numList = DBTableNumberGenerator(startNum.value)
-        DBTableNumber(numList)
-        // 세로선
-        Box(
-            modifier = Modifier.height((37.33f*numList.size).dp)
-        ){
-            VerticalDividers(
-                modifier = Modifier.fillMaxHeight(),
-                thickness = 1.dp,
-                color = Color.LightGray
+    Column (
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight()
+            .background(BackGroundColor)
+            .clip(shape = RoundedCornerShape(35.dp, 35.dp, 0.dp, 0.dp))
+            .background(TableBackGroundColor)
+            .padding(
+                start = 30.dp,
+                end = 30.dp,
             )
-        }
-        
-        // 변환된 열 기준 데이터로 화면에 뿌리기
-        tmpColumn.forEachIndexed { index, item ->
-            tmpOneColumn.add(item)
-
-            // 하나의 열 씩 출력 하도록 modular 연산 수행.
-            if( (index+1)%data.value.size == 0){
-                if((index+1)/data.value.size == 1){
-                    DBTableId(tmpOneColumn)
-                } else {
-                    Log.e("debug","parameter: ${tmpOneColumn.toString()}")
-                    DBTableText(tmpOneColumn)
+            .verticalScroll(verticalScrollState)
+            .horizontalScroll(horizontalScrollState)
+    ){
+        Row (
+        ) {
+            // 주어진 header에 따라 나눠서 담기
+            // 행 기준 데이터를 열 기준으로 변환(화면에 출력할 때 밸런스를 맞추기 위해서 열 기준 출력이 필수적)
+            for (i in 0 until data.value[0].size){
+                data.value.forEachIndexed { index, item ->
+                    tmpColumn.add(item[i])
                 }
+            }
 
-                // 세로선
-                Box(
-                    modifier = Modifier.height((38.07f*data.value.size).dp)
-                ){
-                    // 마지막 테이블 세로선 삭제
-                    if(index+1 != tmpColumn.size){
-                        VerticalDividers(
-                            modifier = Modifier.fillMaxHeight(),
-                            thickness = 1.dp,
-                            color = Color.LightGray
-                        )
+            numList = DBTableNumberGenerator(startNum.value)
+            DBTableNumber(numList)
+            // 세로선
+            Box(
+                modifier = Modifier.height((37.33f*numList.size).dp)
+            ){
+                VerticalDividers(
+                    modifier = Modifier.fillMaxHeight(),
+                    thickness = 1.dp,
+                    color = Color.LightGray
+                )
+            }
+
+            // 변환된 열 기준 데이터로 화면에 뿌리기
+            tmpColumn.forEachIndexed { index, item ->
+                tmpOneColumn.add(item)
+
+                // 하나의 열 씩 출력 하도록 modular 연산 수행.
+                if( (index+1)%data.value.size == 0){
+                    if((index+1)/data.value.size == 1){
+                        DBTableId(tmpOneColumn)
+                    } else {
+                        Log.e("debug","parameter: ${tmpOneColumn.toString()}")
+                        DBTableText(tmpOneColumn)
                     }
-                }
 
-                tmpOneColumn.clear()
+                    // 세로선
+                    Box(
+                        modifier = Modifier.height((38.07f*data.value.size).dp)
+                    ){
+                        // 마지막 테이블 세로선 삭제
+                        if(index+1 != tmpColumn.size){
+                            VerticalDividers(
+                                modifier = Modifier.fillMaxHeight(),
+                                thickness = 1.dp,
+                                color = Color.LightGray
+                            )
+                        }
+                    }
+
+                    tmpOneColumn.clear()
+                }
             }
         }
+        DBTableArrowPack(
+            currentPage = currentPage,
+            maximumPage = maximumPage,
+            dbTableSample = data
+        )
     }
 }
 
@@ -578,37 +582,20 @@ fun DBTableText(
 }
 
 
-@Composable
-fun DBTableOneLeft(
-    currentPage: MutableState<Int>,
-    maximumPage: MutableState<Int>,
-    dbTableSample: MutableState<MutableList<List<String>>>
-){
-    Icon(
-        painter = painterResource(R.drawable.one_left),
-        contentDescription = "",
-        tint = TitleColor,
-        modifier = Modifier.clickable {
-            if (currentPage.value != 1){
-                // 백엔드에 이전 50번째의 데이터 요청
-                dbTableSample.value = dbTableSample2
-            }
-        }
-    )
-}
+
 
 // 이거를 Template안으로
 // Template에서 마지막 줄 제거하기
 @Composable
 fun DBTableArrowPack(
-    currentPage: MutableState<Int>,
-    maximumPage: MutableState<Int>,
+    currentPage: MutableState<String>,
+    maximumPage: MutableState<String>,
     dbTableSample: MutableState<MutableList<List<String>>>
 ){
     Row {
 
         DBTableDoubleLeft(
-                currentPage = currentPage,
+            currentPage = currentPage,
         maximumPage = maximumPage,
         dbTableSample = dbTableSample
         )
@@ -617,7 +604,13 @@ fun DBTableArrowPack(
             maximumPage = maximumPage,
             dbTableSample = dbTableSample
         )
-        //
+
+        DBTablePageControler(
+            currentPage = currentPage,
+            maximumPage = maximumPage,
+            dbTableSample = dbTableSample
+        )
+
         DBTableOneRight(
             currentPage = currentPage,
             maximumPage = maximumPage,
@@ -632,9 +625,31 @@ fun DBTableArrowPack(
 }
 
 @Composable
+fun DBTableOneLeft(
+    currentPage: MutableState<String>,
+    maximumPage: MutableState<String>,
+    dbTableSample: MutableState<MutableList<List<String>>>
+){
+    Icon(
+        painter = painterResource(R.drawable.one_left),
+        contentDescription = "",
+        tint = TitleColor,
+        modifier = Modifier.clickable {
+            if (currentPage.value.toInt() != 1){
+                // 백엔드에 이전 50번째의 데이터 요청
+                dbTableSample.value = dbTableSample2
+                val tmpNum = currentPage.value.toInt() - 1
+                currentPage.value = tmpNum.toString()
+
+            }
+        }
+    )
+}
+
+@Composable
 fun DBTableDoubleLeft(
-    currentPage: MutableState<Int>,
-    maximumPage: MutableState<Int>,
+    currentPage: MutableState<String>,
+    maximumPage: MutableState<String>,
     dbTableSample: MutableState<MutableList<List<String>>>
 ){
     Icon(
@@ -643,10 +658,10 @@ fun DBTableDoubleLeft(
         tint = TitleColor,
         modifier = Modifier
             .clickable {
-                if (currentPage.value != 1){
+                if (currentPage.value.toInt() != 1){
                     // 백엔드에 이전 50번째의 데이터 요청
-                    dbTableSample.value = dbTableSample2
-                    currentPage.value += 1
+                    dbTableSample.value = dbTableSample4
+                    currentPage.value = maximumPage.value.toInt().toString()
                 }
             }
     )
@@ -654,8 +669,8 @@ fun DBTableDoubleLeft(
 
 @Composable
 fun DBTableOneRight(
-    currentPage: MutableState<Int>,
-    maximumPage: MutableState<Int>,
+    currentPage: MutableState<String>,
+    maximumPage: MutableState<String>,
     dbTableSample: MutableState<MutableList<List<String>>>
 ){
     Icon(
@@ -664,10 +679,10 @@ fun DBTableOneRight(
         tint = TitleColor,
         modifier = Modifier
             .clickable {
-            if (currentPage.value != 0){
+            if (currentPage.value.toInt() != maximumPage.value.toInt()){
                 // 백엔드에 이전 50번째의 데이터 요청
-                dbTableSample.value = dbTableSample2
-                currentPage.value += 1
+                dbTableSample.value = dbTableSample3
+                currentPage.value = (currentPage.value.toInt() + 1).toString()
             }
         }
     )
@@ -675,8 +690,8 @@ fun DBTableOneRight(
 
 @Composable
 fun DBTableDoubleRight(
-    currentPage: MutableState<Int>,
-    maximumPage: MutableState<Int>,
+    currentPage: MutableState<String>,
+    maximumPage: MutableState<String>,
     dbTableSample: MutableState<MutableList<List<String>>>
 ){
     Icon(
@@ -685,14 +700,120 @@ fun DBTableDoubleRight(
         tint = TitleColor,
         modifier = Modifier
             .clickable {
-                if (currentPage.value != 0){
+                if (currentPage.value.toInt() != maximumPage.value.toInt()){
                     // 백엔드에 이전 50번째의 데이터 요청
-                    dbTableSample.value = dbTableSample3
-                    currentPage.value += 1
-                    Log.e("debug","click")
+                    dbTableSample.value = dbTableSample5
+                    currentPage.value = maximumPage.value.toInt().toString()
                 }
             }
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DBTablePageControler(
+    currentPage: MutableState<String>,
+    maximumPage: MutableState<String>,
+    dbTableSample: MutableState<MutableList<List<String>>>
+){
+    val interactionSource = remember{ MutableInteractionSource() }
+    val input = remember { mutableStateOf(currentPage.value) }
+    Row(
+        modifier = Modifier
+            .offset(y=-17.dp)
+    ){
+        Box(
+            modifier = Modifier
+                .clip(shape = RoundedCornerShape(15.dp,15.dp,15.dp,15.dp))
+                .offset(y=0.dp)
+                .padding(5.dp)
+        ){
+            BasicTextField(
+                // 필터 입력 후 Action에 대해 정의
+                keyboardActions = KeyboardActions(
+                    // 예시)
+                    // 백엔드로 필터링 된 데이터 요청 함수
+                    // callFilter2Backend(input)
+                    
+                    // 선택된 페이지에 관한 데이터는 이 함수의 input 변수를 활용
+                    onDone = {
+                        Log.e("debug","working")
+                        // 유저의 입력값이 정수인 경우
+                        // 추가적으로 제공하는 데이터베이스보다 작은 값의 데이터를 요구하게 제한해야함(나중에)
+                        if(input.value.toIntOrNull() != null){
+                            currentPage.value = input.value.toString()
+                            dbTableSample.value = dbTableSample6
+
+                        }
+                    }
+                ),
+                value = input.value,
+                onValueChange = {input.value = it},
+                modifier = Modifier
+
+                    .clip(shape = RoundedCornerShape(15.dp,15.dp,15.dp,15.dp))
+
+                    .background(
+                        color = Color(216,224,227)
+                    )
+                    .width((43 + input.value.length*2).dp)
+                    .height(45.dp)
+
+                ,
+                singleLine = true,
+                textStyle = TextStyle(
+                    color = TextColor,
+                    fontFamily = FontFamily(Font(R.font.roboto_bold)),
+                    fontSize = 14.sp
+                ),
+
+                decorationBox = @Composable{ innerTextField ->
+                    TextFieldDefaults.DecorationBox(
+                        placeholder = {
+                            Text(
+                                modifier = Modifier.padding(10.dp),
+                                text = "",
+                                color = Color.LightGray,
+                                style = TextStyle(
+                                    color = TitleColor,
+                                    fontFamily = FontFamily(Font(R.font.roboto_bold)),
+                                    fontSize = 14.sp
+                                ),
+                            )
+                        },
+                        singleLine = true,
+                        visualTransformation = VisualTransformation.None,
+                        enabled = true,
+                        innerTextField = innerTextField,
+                        value = input.value.toString(),
+                        interactionSource = interactionSource,
+                        colors = TextFieldDefaults.colors(
+                            focusedTextColor = TextColor,
+                            unfocusedTextColor = TextColor,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            cursorColor = TextColor,
+                            unfocusedContainerColor = Color.Transparent,
+                            focusedContainerColor = Color.Transparent,
+                            errorContainerColor = Color.Transparent,
+                            disabledContainerColor = Color.Transparent
+                        )
+                    )
+                }
+            )
+        }
+        Text(
+            modifier = Modifier
+                .offset(y = 20.dp),
+            text = "of ${maximumPage.value}",
+            color = TextColor,
+            style = TextStyle(
+                color = TitleColor,
+                fontFamily = FontFamily(Font(R.font.roboto_bold)),
+                fontSize = 14.sp
+            )
+        )
+    }
 }
 
 // 데이터 넘버링 생성기
