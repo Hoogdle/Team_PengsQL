@@ -31,8 +31,13 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.vept.ed.L4.EditorMainActivity
+import com.example.vept.ed.L4.EditerMain
+
 import com.example.vept.sysops.L1.FileExplorer
+
+//import com.example.vept.ed.L4L.EditorMainActivity
+
+
 
 
 @Composable
@@ -93,9 +98,17 @@ fun FileList(viewModel: MainDesignViewModel) {
                     Text(text = "-", modifier = Modifier.weight(2f)) // 크기정보 없으면 대시
 
                     Button(onClick = {
+                        /*
                         val intent = Intent(context, EditorMainActivity::class.java)
                         intent.putExtra(EditorMainActivity.EXTRA_DATABASE_NAME, fileName)
                         context.startActivity(intent)
+
+                          */
+                        //(context as? Activity)?.finish()
+                        val intent = Intent(context, EditerMain::class.java)
+                        intent.putExtra(EditerMain.EXTRA_DATABASE_NAME, fileName)
+                        context.startActivity(intent)
+
                     }) {
                         Text("편집")
                     }

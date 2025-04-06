@@ -1,7 +1,6 @@
-package com.example.vept.ed.L4;
+package com.example.vept.ed.L4L;
 
 
-import android.database.Cursor;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
@@ -14,8 +13,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.vept.R;
 import com.example.vept.ed.L2.EditDB;
-
-import org.w3c.dom.Text;
 
 import java.util.List;
 
@@ -50,7 +47,7 @@ public class EditorShowListActivity extends AppCompatActivity {
     }
 
     private void OpenDB(String DBName) {
-        db = new EditDB(this,DBName);
+        //db = new EditDB(this,DBName);
     }
 
     private void MakeTable() {

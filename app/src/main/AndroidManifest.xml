@@ -31,18 +31,21 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".ed.L4.EditorMainActivity"
-            android:exported="false"
-            android:theme="@style/Theme.VEPT" />
 
         <activity
-            android:name=".ed.L4.EditorMainActivity"
+            android:name=".ed.L4.EditerMain"
             android:exported="false"
             android:theme="@style/Theme.VEPT" />
-
         <activity
-            android:name=".ed.L4.EditorShowListActivity"
+            android:name=".ed.L4.EditSqlCli"
+            android:exported="false"
+            android:theme="@style/Theme.VEPT" />
+        <activity
+            android:name=".ed.L4.EditTableList"
+            android:exported="false"
+            android:theme="@style/Theme.VEPT" />
+        <activity
+            android:name=".ed.L4.EditTableMod"
             android:exported="false"
             android:theme="@style/Theme.VEPT" />
 

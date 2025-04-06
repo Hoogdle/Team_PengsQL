@@ -1,18 +1,14 @@
-package com.example.vept.ed.L4;
+package com.example.vept.ed.L4L;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.SimpleExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.vept.MainActivity;
 import com.example.vept.R;
 import com.example.vept.ed.L2.EditDB;
 
@@ -40,13 +36,13 @@ public class EditorMainActivity extends AppCompatActivity {
         if (databaseName != null) {
             tvDatabaseName.setText(databaseName);
         }
-        OpenDB(databaseName);
+        //OpenDB(databaseName);
         initializeExpandableListView();
         InitBtns();
     }
 
     private void OpenDB(String DBName) {
-        db = new EditDB(this,DBName);
+    //    db = new EditDB(this,DBName);
     }
 
     private void initializeExpandableListView() {

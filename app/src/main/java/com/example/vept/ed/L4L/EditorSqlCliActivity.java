@@ -1,4 +1,4 @@
-package com.example.vept.ed.L4;
+package com.example.vept.ed.L4L;
 
 
 import android.os.Bundle;
@@ -22,6 +22,6 @@ public class EditorSqlCliActivity extends AppCompatActivity {
     }
 
     private void OpenDB(String DBName) {
-        db = new EditDB(this,DBName);
+        //db = new EditDB(this,DBName);
     }
 }
