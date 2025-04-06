@@ -31,6 +31,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -81,6 +82,10 @@ import kotlin.math.sin
 fun DBTable(
     navController: NavController
 ){
+    val dbTableSample = remember{ mutableStateOf(dbTableSample1)}
+    val currentPage = remember { mutableStateOf(1) }
+    val maximumPage = remember { mutableStateOf(7) } // 임의로 정한 maximum page, 나중에는 실제 DB 데이터 개수에 따른 페이지만큼 초기화 필요
+
     Column (
         Modifier
             .background(BackGroundColor)
@@ -88,6 +93,7 @@ fun DBTable(
                 top = 25.dp
             )
     ){
+
         ArrowAndMenu()
         Spacer(modifier = Modifier.height(15.dp))
         Row (
@@ -100,7 +106,21 @@ fun DBTable(
             DBTableTextField()
 
         }
-        DBTableTemplate(dbTableSample)
+
+        DBTableTemplate(dbTableSample.value)
+    }
+    Box(
+        modifier = Modifier
+            .offset(
+                x = 250.dp,
+                y = 350.dp
+            )
+    ){
+        DBTableArrowPack(
+            currentPage = currentPage,
+            maximumPage = maximumPage,
+            dbTableSample = dbTableSample
+        )
     }
 }
 
@@ -195,7 +215,7 @@ fun DBTableTemplate(
         DBTableNumber(numList)
         // 세로선
         Box(
-            modifier = Modifier.height((37.5*numList.size).dp)
+            modifier = Modifier.height((37.33f*numList.size).dp)
         ){
             VerticalDividers(
                 modifier = Modifier.fillMaxHeight(),
@@ -218,7 +238,7 @@ fun DBTableTemplate(
 
                 // 세로선
                 Box(
-                    modifier = Modifier.height((38.24f*data.size).dp)
+                    modifier = Modifier.height((38.07f*data.size).dp)
                 ){
                     // 마지막 테이블 세로선 삭제
                     if(index+1 != tmpColumn.size){
@@ -544,6 +564,122 @@ fun DBTableText(
 }
 
 
+@Composable
+fun DBTableOneLeft(
+    currentPage: MutableState<Int>,
+    maximumPage: MutableState<Int>,
+    dbTableSample: MutableState<MutableList<List<String>>>
+){
+    Icon(
+        painter = painterResource(R.drawable.one_left),
+        contentDescription = "",
+        tint = TitleColor,
+        modifier = Modifier.clickable {
+            if (currentPage.value != 1){
+                // 백엔드에 이전 50번째의 데이터 요청
+                dbTableSample.value = dbTableSample2
+            }
+        }
+    )
+}
+
+// 이거를 Template안으로
+// Template에서 마지막 줄 제거하기
+@Composable
+fun DBTableArrowPack(
+    currentPage: MutableState<Int>,
+    maximumPage: MutableState<Int>,
+    dbTableSample: MutableState<MutableList<List<String>>>
+){
+    Row {
+
+        DBTableDoubleLeft(
+                currentPage = currentPage,
+        maximumPage = maximumPage,
+        dbTableSample = dbTableSample
+        )
+        DBTableOneLeft(
+            currentPage = currentPage,
+            maximumPage = maximumPage,
+            dbTableSample = dbTableSample
+        )
+        //
+        DBTableOneRight(
+            currentPage = currentPage,
+            maximumPage = maximumPage,
+            dbTableSample = dbTableSample
+        )
+        DBTableDoubleRight(
+            currentPage = currentPage,
+            maximumPage = maximumPage,
+            dbTableSample = dbTableSample
+        )
+    }
+}
+
+@Composable
+fun DBTableDoubleLeft(
+    currentPage: MutableState<Int>,
+    maximumPage: MutableState<Int>,
+    dbTableSample: MutableState<MutableList<List<String>>>
+){
+    Icon(
+        painter = painterResource(R.drawable.double_left),
+        contentDescription = "",
+        tint = TitleColor,
+        modifier = Modifier
+            .clickable {
+                if (currentPage.value != 1){
+                    // 백엔드에 이전 50번째의 데이터 요청
+                    dbTableSample.value = dbTableSample2
+                    currentPage.value += 1
+                }
+            }
+    )
+}
+
+@Composable
+fun DBTableOneRight(
+    currentPage: MutableState<Int>,
+    maximumPage: MutableState<Int>,
+    dbTableSample: MutableState<MutableList<List<String>>>
+){
+    Icon(
+        painter = painterResource(R.drawable.one_right),
+        contentDescription = "",
+        tint = TitleColor,
+        modifier = Modifier
+            .clickable {
+            if (currentPage.value != 1){
+                // 백엔드에 이전 50번째의 데이터 요청
+                dbTableSample.value = dbTableSample2
+                currentPage.value += 1
+            }
+        }
+    )
+}
+
+@Composable
+fun DBTableDoubleRight(
+    currentPage: MutableState<Int>,
+    maximumPage: MutableState<Int>,
+    dbTableSample: MutableState<MutableList<List<String>>>
+){
+    Icon(
+        painter = painterResource(R.drawable.double_right),
+        contentDescription = "",
+        tint = TitleColor,
+        modifier = Modifier
+            .clickable {
+                if (currentPage.value != 1){
+                    // 백엔드에 이전 50번째의 데이터 요청
+                    dbTableSample.value = dbTableSample2
+                    currentPage.value += 1
+                }
+            }
+    )
+}
+
 // 데이터 넘버링 생성기
 fun DBTableNumberGenerator(
     start: Int
@@ -556,4 +692,6 @@ fun DBTableNumberGenerator(
     }
     return numberList
 }
+
+
 

@@ -48,262 +48,6 @@ val coffees = listOf(
 
 val DBTableIdSample = List(50) { Random.nextInt(1, 1000).toString() } // please fill listOf with 50 random Int
 
-val dbTableSample1: List<String> = listOf(
-    Random.nextInt(1, 1000).toString(), // id
-    names.random(),
-    genders.random(),
-    nicknames.random(),
-    foods.random(),
-    sports.random(),
-    colors.random(),
-    coffees.random()
-)
-val dbTableSample2: List<String> = listOf(
-    Random.nextInt(1, 1000).toString(),
-    names.random(),
-    genders.random(),
-    nicknames.random(),
-    foods.random(),
-    sports.random(),
-    colors.random(),
-    coffees.random()
-)
-val dbTableSample3: List<String> = listOf(
-    Random.nextInt(1, 1000).toString(),
-    names.random(),
-    genders.random(),
-    nicknames.random(),
-    foods.random(),
-    sports.random(),
-    colors.random(),
-    coffees.random()
-)
-val dbTableSample4: List<String> = listOf(
-    Random.nextInt(1, 1000).toString(),
-    names.random(),
-    genders.random(),
-    nicknames.random(),
-    foods.random(),
-    sports.random(),
-    colors.random(),
-    coffees.random()
-)
-val dbTableSample5: List<String> = listOf(
-    Random.nextInt(1, 1000).toString(),
-    names.random(),
-    genders.random(),
-    nicknames.random(),
-    foods.random(),
-    sports.random(),
-    colors.random(),
-    coffees.random()
-)
-val dbTableSample6: List<String> = listOf(
-    Random.nextInt(1, 1000).toString(),
-    names.random(),
-    genders.random(),
-    nicknames.random(),
-    foods.random(),
-    sports.random(),
-    colors.random(),
-    coffees.random()
-)
-val dbTableSample7: List<String> = listOf(
-    Random.nextInt(1, 1000).toString(),
-    names.random(),
-    genders.random(),
-    nicknames.random(),
-    foods.random(),
-    sports.random(),
-    colors.random(),
-    coffees.random()
-)
-val dbTableSample8: List<String> = listOf(
-    Random.nextInt(1, 1000).toString(),
-    names.random(),
-    genders.random(),
-    nicknames.random(),
-    foods.random(),
-    sports.random(),
-    colors.random(),
-    coffees.random()
-)
-val dbTableSample9: List<String> = listOf(
-    Random.nextInt(1, 1000).toString(),
-    names.random(),
-    genders.random(),
-    nicknames.random(),
-    foods.random(),
-    sports.random(),
-    colors.random(),
-    coffees.random()
-)
-val dbTableSample10: List<String> = listOf(
-    Random.nextInt(1, 1000).toString(),
-    names.random(),
-    genders.random(),
-    nicknames.random(),
-    foods.random(),
-    sports.random(),
-    colors.random(),
-    coffees.random()
-)
-val dbTableSample11: List<String> = listOf(
-    Random.nextInt(1, 1000).toString(),
-    names.random(),
-    genders.random(),
-    nicknames.random(),
-    foods.random(),
-    sports.random(),
-    colors.random(),
-    coffees.random()
-)
-val dbTableSample12: List<String> = listOf(
-    Random.nextInt(1, 1000).toString(),
-    names.random(),
-    genders.random(),
-    nicknames.random(),
-    foods.random(),
-    sports.random(),
-    colors.random(),
-    coffees.random()
-)
-val dbTableSample13: List<String> = listOf(
-    Random.nextInt(1, 1000).toString(),
-    names.random(),
-    genders.random(),
-    nicknames.random(),
-    foods.random(),
-    sports.random(),
-    colors.random(),
-    coffees.random()
-)
-val dbTableSample14: List<String> = listOf(
-    Random.nextInt(1, 1000).toString(),
-    names.random(),
-    genders.random(),
-    nicknames.random(),
-    foods.random(),
-    sports.random(),
-    colors.random(),
-    coffees.random()
-)
-val dbTableSample15: List<String> = listOf(
-    Random.nextInt(1, 1000).toString(),
-    names.random(),
-    genders.random(),
-    nicknames.random(),
-    foods.random(),
-    sports.random(),
-    colors.random(),
-    coffees.random()
-)
-val dbTableSample16: List<String> = listOf(
-    Random.nextInt(1, 1000).toString(),
-    names.random(),
-    genders.random(),
-    nicknames.random(),
-    foods.random(),
-    sports.random(),
-    colors.random(),
-    coffees.random()
-)
-val dbTableSample17: List<String> = listOf(
-    Random.nextInt(1, 1000).toString(),
-    names.random(),
-    genders.random(),
-    nicknames.random(),
-    foods.random(),
-    sports.random(),
-    colors.random(),
-    coffees.random()
-)
-val dbTableSample18: List<String> = listOf(
-    Random.nextInt(1, 1000).toString(),
-    names.random(),
-    genders.random(),
-    nicknames.random(),
-    foods.random(),
-    sports.random(),
-    colors.random(),
-    coffees.random()
-)
-val dbTableSample19: List<String> = listOf(
-    Random.nextInt(1, 1000).toString(),
-    names.random(),
-    genders.random(),
-    nicknames.random(),
-    foods.random(),
-    sports.random(),
-    colors.random(),
-    coffees.random()
-)
-val dbTableSample20: List<String> = listOf(
-    Random.nextInt(1, 1000).toString(),
-    names.random(),
-    genders.random(),
-    nicknames.random(),
-    foods.random(),
-    sports.random(),
-    colors.random(),
-    coffees.random()
-)
-val dbTableSample21: List<String> = listOf(
-    Random.nextInt(1, 1000).toString(),
-    names.random(),
-    genders.random(),
-    nicknames.random(),
-    foods.random(),
-    sports.random(),
-    colors.random(),
-    coffees.random()
-)
-val dbTableSample22: List<String> = listOf(
-    Random.nextInt(1, 1000).toString(),
-    names.random(),
-    genders.random(),
-    nicknames.random(),
-    foods.random(),
-    sports.random(),
-    colors.random(),
-    coffees.random()
-)
-val dbTableSample23: List<String> = listOf(
-    Random.nextInt(1, 1000).toString(),
-    names.random(),
-    genders.random(),
-    nicknames.random(),
-    foods.random(),
-    sports.random(),
-    colors.random(),
-    coffees.random()
-)
-val dbTableSample24: List<String> = listOf(
-    Random.nextInt(1, 1000).toString(),
-    names.random(),
-    genders.random(),
-    nicknames.random(),
-    foods.random(),
-    sports.random(),
-    colors.random(),
-    coffees.random()
-)
-val dbTableSample25: List<String> = listOf(
-    Random.nextInt(1, 1000).toString(),
-    names.random(),
-    genders.random(),
-    nicknames.random(),
-    foods.random(),
-    sports.random(),
-    colors.random(),
-    coffees.random()
-)
-
-
-
-
-
-
 
 val DBTableHeaderName = listOf("id","name","gender","nickname","food","sports","color","coffee")
 
@@ -313,7 +57,7 @@ val DBTableHeaderName = listOf("id","name","gender","nickname","food","sports","
 // 형식 : List<List<String>>
 // [[id, name, gander, nickname],[1,kim,male,hoho],[3,joe,male,rurl],[7,sam,male,coco]]
 
-val dbTableSample: MutableList<List<String>> = mutableListOf<List<String>>().apply {
+val dbTableSample1: MutableList<List<String>> = mutableListOf<List<String>>().apply {
     add(DBTableHeaderName)
     for (i in 0 until 50) {
         add(
@@ -330,4 +74,107 @@ val dbTableSample: MutableList<List<String>> = mutableListOf<List<String>>().app
         )
     }
 }
+val dbTableSample2: MutableList<List<String>> = mutableListOf<List<String>>().apply {
+    add(DBTableHeaderName)
+    for (i in 0 until 50) {
+        add(
+            listOf(
+                Random.nextInt(1, 1000).toString(),
+                names.random(),
+                genders.random(),
+                nicknames.random(),
+                foods.random(),
+                sports.random(),
+                colors.random(),
+                coffees.random()
+            )
+        )
+    }
+}
+val dbTableSample3: MutableList<List<String>> = mutableListOf<List<String>>().apply {
+    add(DBTableHeaderName)
+    for (i in 0 until 50) {
+        add(
+            listOf(
+                Random.nextInt(1, 1000).toString(),
+                names.random(),
+                genders.random(),
+                nicknames.random(),
+                foods.random(),
+                sports.random(),
+                colors.random(),
+                coffees.random()
+            )
+        )
+    }
+}
+val dbTableSample4: MutableList<List<String>> = mutableListOf<List<String>>().apply {
+    add(DBTableHeaderName)
+    for (i in 0 until 50) {
+        add(
+            listOf(
+                Random.nextInt(1, 1000).toString(),
+                names.random(),
+                genders.random(),
+                nicknames.random(),
+                foods.random(),
+                sports.random(),
+                colors.random(),
+                coffees.random()
+            )
+        )
+    }
+}
+val dbTableSample5: MutableList<List<String>> = mutableListOf<List<String>>().apply {
+    add(DBTableHeaderName)
+    for (i in 0 until 50) {
+        add(
+            listOf(
+                Random.nextInt(1, 1000).toString(),
+                names.random(),
+                genders.random(),
+                nicknames.random(),
+                foods.random(),
+                sports.random(),
+                colors.random(),
+                coffees.random()
+            )
+        )
+    }
+}
+val dbTableSample6: MutableList<List<String>> = mutableListOf<List<String>>().apply {
+    add(DBTableHeaderName)
+    for (i in 0 until 50) {
+        add(
+            listOf(
+                Random.nextInt(1, 1000).toString(),
+                names.random(),
+                genders.random(),
+                nicknames.random(),
+                foods.random(),
+                sports.random(),
+                colors.random(),
+                coffees.random()
+            )
+        )
+    }
+}
+val dbTableSample7: MutableList<List<String>> = mutableListOf<List<String>>().apply {
+    add(DBTableHeaderName)
+    for (i in 0 until 50) {
+        add(
+            listOf(
+                Random.nextInt(1, 1000).toString(),
+                names.random(),
+                genders.random(),
+                nicknames.random(),
+                foods.random(),
+                sports.random(),
+                colors.random(),
+                coffees.random()
+            )
+        )
+    }
+}
+
 
