@@ -593,34 +593,46 @@ fun DBTableArrowPack(
     maximumPage: MutableState<String>,
     dbTableSample: MutableState<MutableList<List<String>>>
 ){
+    val isChanged = remember{ mutableStateOf(false) }
+    val isInputChanged = remember { mutableStateOf(false) }
     Row {
 
         DBTableDoubleLeft(
             currentPage = currentPage,
         maximumPage = maximumPage,
-        dbTableSample = dbTableSample
+        dbTableSample = dbTableSample,
+            isChanged = isChanged,
+            isInputChanged = isInputChanged
         )
         DBTableOneLeft(
             currentPage = currentPage,
             maximumPage = maximumPage,
-            dbTableSample = dbTableSample
+            dbTableSample = dbTableSample,
+            isChanged = isChanged,
+            isInputChanged = isInputChanged
         )
 
         DBTablePageControler(
             currentPage = currentPage,
             maximumPage = maximumPage,
-            dbTableSample = dbTableSample
+            dbTableSample = dbTableSample,
+            isChanged = isChanged.value,
+            isInputChanged = isInputChanged
         )
 
         DBTableOneRight(
             currentPage = currentPage,
             maximumPage = maximumPage,
-            dbTableSample = dbTableSample
+            dbTableSample = dbTableSample,
+            isChanged = isChanged,
+            isInputChanged = isInputChanged
         )
         DBTableDoubleRight(
             currentPage = currentPage,
             maximumPage = maximumPage,
-            dbTableSample = dbTableSample
+            dbTableSample = dbTableSample,
+            isChanged = isChanged,
+            isInputChanged = isInputChanged
         )
     }
 }
@@ -629,7 +641,10 @@ fun DBTableArrowPack(
 fun DBTableOneLeft(
     currentPage: MutableState<String>,
     maximumPage: MutableState<String>,
-    dbTableSample: MutableState<MutableList<List<String>>>
+    dbTableSample: MutableState<MutableList<List<String>>>,
+    isChanged: MutableState<Boolean>,
+    isInputChanged: MutableState<Boolean>
+
 ){
     Icon(
         painter = painterResource(R.drawable.one_left),
@@ -641,7 +656,8 @@ fun DBTableOneLeft(
                 dbTableSample.value = dbTableSample2
                 val tmpNum = currentPage.value.toInt() - 1
                 currentPage.value = tmpNum.toString()
-
+                isChanged.value = true
+                isInputChanged.value = false
             }
         }
     )
@@ -651,7 +667,9 @@ fun DBTableOneLeft(
 fun DBTableDoubleLeft(
     currentPage: MutableState<String>,
     maximumPage: MutableState<String>,
-    dbTableSample: MutableState<MutableList<List<String>>>
+    dbTableSample: MutableState<MutableList<List<String>>>,
+    isChanged: MutableState<Boolean>,
+    isInputChanged: MutableState<Boolean>
 ){
     Icon(
         painter = painterResource(R.drawable.double_left),
@@ -663,6 +681,8 @@ fun DBTableDoubleLeft(
                     // 백엔드에 이전 50번째의 데이터 요청
                     dbTableSample.value = dbTableSample4
                     currentPage.value = 1.toString()
+                    isChanged.value = true
+                    isInputChanged.value = false
                 }
             }
     )
@@ -672,7 +692,9 @@ fun DBTableDoubleLeft(
 fun DBTableOneRight(
     currentPage: MutableState<String>,
     maximumPage: MutableState<String>,
-    dbTableSample: MutableState<MutableList<List<String>>>
+    dbTableSample: MutableState<MutableList<List<String>>>,
+    isChanged: MutableState<Boolean>,
+    isInputChanged: MutableState<Boolean>
 ){
     Icon(
         painter = painterResource(R.drawable.one_right),
@@ -684,6 +706,8 @@ fun DBTableOneRight(
                 // 백엔드에 이전 50번째의 데이터 요청
                 dbTableSample.value = dbTableSample3
                 currentPage.value = (currentPage.value.toInt() + 1).toString()
+                isChanged.value = true
+                isInputChanged.value = false
             }
         }
     )
@@ -693,7 +717,9 @@ fun DBTableOneRight(
 fun DBTableDoubleRight(
     currentPage: MutableState<String>,
     maximumPage: MutableState<String>,
-    dbTableSample: MutableState<MutableList<List<String>>>
+    dbTableSample: MutableState<MutableList<List<String>>>,
+    isChanged: MutableState<Boolean>,
+    isInputChanged: MutableState<Boolean>
 ){
     Icon(
         painter = painterResource(R.drawable.double_right),
@@ -705,24 +731,33 @@ fun DBTableDoubleRight(
                     // 백엔드에 이전 50번째의 데이터 요청
                     dbTableSample.value = dbTableSample5
                     currentPage.value = maximumPage.value.toInt().toString()
+                    isChanged.value = true
+                    isInputChanged.value = false
+                    
                 }
             }
     )
 }
 
+// 사용자 입력과 버튼 숫자 표시 컨트롤 난이도 최상
+// 버튼 클릭시 isChanged 활성화 && isInputChanged 비활성화 => 클릭한 결과의 페이지 화면출력
+// 사용자 입력시 isInputChanged 활성화 => 사용자가 입력한 데이터 화면 출력
+// 솔직히 지금도 깔끔하게 이해가 되질 않음. 근데 되긴함.
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DBTablePageControler(
     currentPage: MutableState<String>,
     maximumPage: MutableState<String>,
-    dbTableSample: MutableState<MutableList<List<String>>>
+    dbTableSample: MutableState<MutableList<List<String>>>,
+    isInputChanged: MutableState<Boolean>,
+    isChanged: Boolean,
 ){
+    Log.e("ischanged","${isChanged}")
 
 
     val interactionSource = remember{ MutableInteractionSource() }
     val input = remember { mutableStateOf(currentPage.value) }
     val savedCurrentPage = remember { mutableStateOf(currentPage.value) }
-    val isInputChanged = remember{ mutableStateOf(false) }
     Log.e("current","currentPage: ${currentPage.value}")
     Log.e("current","Input: ${input.value}")
 
@@ -757,10 +792,15 @@ fun DBTablePageControler(
                         }
                     }
                 ),
-                value = input.value,
+                value = if(isChanged == true && !isInputChanged.value){
+                    currentPage.value
+                } else {
+                    input.value
+                },
                 onValueChange = {
                     isInputChanged.value = true
-                    input.value = it },
+                    input.value = it
+                                },
                 modifier = Modifier
 
                     .clip(shape = RoundedCornerShape(15.dp,15.dp,15.dp,15.dp))
