@@ -107,7 +107,7 @@ fun DBTable(
 
         }
 
-        DBTableTemplate(dbTableSample.value)
+        DBTableTemplate(dbTableSample)
     }
     Box(
         modifier = Modifier
@@ -181,7 +181,7 @@ fun DBTableTextField(){
 
 @Composable
 fun DBTableTemplate(
-    data: List<List<String>>
+    data: MutableState<MutableList<List<String>>>
 ){
     val verticalScrollState = rememberScrollState()
     val horizontalScrollState = rememberScrollState()
@@ -205,8 +205,8 @@ fun DBTableTemplate(
     ) {
         // 주어진 header에 따라 나눠서 담기
         // 행 기준 데이터를 열 기준으로 변환(화면에 출력할 때 밸런스를 맞추기 위해서 열 기준 출력이 필수적)
-        for (i in 0 until data[0].size){
-            data.forEachIndexed { index, item ->
+        for (i in 0 until data.value[0].size){
+            data.value.forEachIndexed { index, item ->
                 tmpColumn.add(item[i])
             }
         }
@@ -229,16 +229,17 @@ fun DBTableTemplate(
             tmpOneColumn.add(item)
 
             // 하나의 열 씩 출력 하도록 modular 연산 수행.
-            if( (index+1)%data.size == 0){
-                if((index+1)/data.size == 1){
+            if( (index+1)%data.value.size == 0){
+                if((index+1)/data.value.size == 1){
                     DBTableId(tmpOneColumn)
                 } else {
+                    Log.e("debug","parameter: ${tmpOneColumn.toString()}")
                     DBTableText(tmpOneColumn)
                 }
 
                 // 세로선
                 Box(
-                    modifier = Modifier.height((38.07f*data.size).dp)
+                    modifier = Modifier.height((38.07f*data.value.size).dp)
                 ){
                     // 마지막 테이블 세로선 삭제
                     if(index+1 != tmpColumn.size){
@@ -420,14 +421,27 @@ fun DBTableId(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DBTableText(
-    data: List<String>
+    data: MutableList<String>
 ){
     val input = remember { mutableStateOf("") }
     val tmpData = remember{ mutableStateListOf<String>().apply { addAll(data) } }
     val interactionSource = remember{ MutableInteractionSource() }
+    Log.e("debug","tmpData : ${tmpData.toString()}")
+    Log.e("debug","data : ${data.toString()}")
+
+    // textfiled 입려과 같은 recompose 발생시 data가 []가 되는 이상한 현상 발생
+    // 따라서 data의 값이 변하고 data가 ![] 인 경우 => 새로운 data가 들어온 경우
+    // 에만 tmpData의 값을 변경하여 문제 해결
+    if(data != tmpData && !data.isEmpty()){
+        tmpData.clear()
+        tmpData.apply{addAll(data)}
+    }
 
     Column() {
         val mostLong = tmpData.maxOf { it.length }
+
+
+
         tmpData.forEachIndexed { index, item ->
             // empty part
             // list of number는 "","",1,2,3,4,5,... 형태로 나아감
@@ -650,7 +664,7 @@ fun DBTableOneRight(
         tint = TitleColor,
         modifier = Modifier
             .clickable {
-            if (currentPage.value != 1){
+            if (currentPage.value != 0){
                 // 백엔드에 이전 50번째의 데이터 요청
                 dbTableSample.value = dbTableSample2
                 currentPage.value += 1
@@ -671,10 +685,11 @@ fun DBTableDoubleRight(
         tint = TitleColor,
         modifier = Modifier
             .clickable {
-                if (currentPage.value != 1){
+                if (currentPage.value != 0){
                     // 백엔드에 이전 50번째의 데이터 요청
-                    dbTableSample.value = dbTableSample2
+                    dbTableSample.value = dbTableSample3
                     currentPage.value += 1
+                    Log.e("debug","click")
                 }
             }
     )
