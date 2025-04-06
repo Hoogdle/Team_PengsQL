@@ -33,6 +33,7 @@ import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.currentCompositionErrors
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -209,7 +210,7 @@ fun DBTableTemplate(
                 }
             }
 
-            numList = DBTableNumberGenerator(startNum.value)
+            numList = DBTableNumberGenerator(startNum.value + (currentPage.value.toInt()-1)*50)
             DBTableNumber(numList)
             // 세로선
             Box(
@@ -661,7 +662,7 @@ fun DBTableDoubleLeft(
                 if (currentPage.value.toInt() != 1){
                     // 백엔드에 이전 50번째의 데이터 요청
                     dbTableSample.value = dbTableSample4
-                    currentPage.value = maximumPage.value.toInt().toString()
+                    currentPage.value = 1.toString()
                 }
             }
     )
@@ -716,8 +717,16 @@ fun DBTablePageControler(
     maximumPage: MutableState<String>,
     dbTableSample: MutableState<MutableList<List<String>>>
 ){
+
+
     val interactionSource = remember{ MutableInteractionSource() }
     val input = remember { mutableStateOf(currentPage.value) }
+    val savedCurrentPage = remember { mutableStateOf(currentPage.value) }
+    val isInputChanged = remember{ mutableStateOf(false) }
+    Log.e("current","currentPage: ${currentPage.value}")
+    Log.e("current","Input: ${input.value}")
+
+
     Row(
         modifier = Modifier
             .offset(y=-17.dp)
@@ -738,6 +747,7 @@ fun DBTablePageControler(
                     // 선택된 페이지에 관한 데이터는 이 함수의 input 변수를 활용
                     onDone = {
                         Log.e("debug","working")
+
                         // 유저의 입력값이 정수인 경우
                         // 추가적으로 제공하는 데이터베이스보다 작은 값의 데이터를 요구하게 제한해야함(나중에)
                         if(input.value.toIntOrNull() != null){
@@ -748,7 +758,9 @@ fun DBTablePageControler(
                     }
                 ),
                 value = input.value,
-                onValueChange = {input.value = it},
+                onValueChange = {
+                    isInputChanged.value = true
+                    input.value = it },
                 modifier = Modifier
 
                     .clip(shape = RoundedCornerShape(15.dp,15.dp,15.dp,15.dp))
