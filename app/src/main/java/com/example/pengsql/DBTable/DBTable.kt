@@ -1,8 +1,12 @@
 package com.example.pengsql.DBTable
 
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.InteractionSource
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,7 +20,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -24,17 +31,25 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.integerResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import com.example.pengsql.Others.ArrowAndMenu
 import com.example.pengsql.R
@@ -60,6 +75,7 @@ import com.example.pengsql.ui.theme.BackGroundColor
 import com.example.pengsql.ui.theme.TableBackGroundColor
 import com.example.pengsql.ui.theme.TextColor
 import com.example.pengsql.ui.theme.TitleColor
+import kotlin.math.sin
 
 @Composable
 fun DBTable(
@@ -151,6 +167,8 @@ fun DBTableTemplate(
     val horizontalScrollState = rememberScrollState()
     val tmpColumn: MutableList<String> = mutableListOf()
     val tmpOneColumn: MutableList<String> = mutableListOf()
+    val startNum = remember { mutableStateOf(1) }
+    lateinit var numList: MutableList<String>
 
     Row (modifier = Modifier
         .fillMaxWidth()
@@ -165,19 +183,42 @@ fun DBTableTemplate(
         .verticalScroll(verticalScrollState)
         .horizontalScroll(horizontalScrollState)
     ) {
-        for (i in 0..8){
+        // 주어진 header에 따라 나눠서 담기
+        // 행 기준 데이터를 열 기준으로 변환(화면에 출력할 때 밸런스를 맞추기 위해서 열 기준 출력이 필수적)
+        for (i in 0 until data[0].size){
             data.forEachIndexed { index, item ->
                 tmpColumn.add(item[i])
             }
         }
+
+        numList = DBTableNumberGenerator(startNum.value)
+        DBTableNumber(numList)
+        // 세로선
+        Box(
+            modifier = Modifier.height((37.5*numList.size).dp)
+        ){
+            VerticalDividers(
+                modifier = Modifier.fillMaxHeight(),
+                thickness = 1.dp,
+                color = Color.LightGray
+            )
+        }
+        
+        // 변환된 열 기준 데이터로 화면에 뿌리기
         tmpColumn.forEachIndexed { index, item ->
             tmpOneColumn.add(item)
+
+            // 하나의 열 씩 출력 하도록 modular 연산 수행.
             if( (index+1)%data.size == 0){
-                DBTableText(tmpOneColumn)
+                if((index+1)/data.size == 1){
+                    DBTableId(tmpOneColumn)
+                } else {
+                    DBTableText(tmpOneColumn)
+                }
 
                 // 세로선
                 Box(
-                    modifier = Modifier.height((37*data.size).dp)
+                    modifier = Modifier.height((38.24f*data.size).dp)
                 ){
                     // 마지막 테이블 세로선 삭제
                     if(index+1 != tmpColumn.size){
@@ -188,6 +229,7 @@ fun DBTableTemplate(
                         )
                     }
                 }
+
                 tmpOneColumn.clear()
             }
         }
@@ -195,31 +237,322 @@ fun DBTableTemplate(
 }
 
 @Composable
-fun DBTableNumber(){
-
+fun DBTableNumber(
+    data: List<String>
+){
+    Column(){
+        val mostLong = data.maxOf{it.length}
+        data.forEachIndexed { index, item ->
+            // empty part
+            // list of number는 "","",1,2,3,4,5,... 형태로 나아감
+            // 즉 0번째, 1번째 인덱스는 빈 문자열
+            if(index == 0 || index == 1){
+                Text(
+                    modifier = Modifier
+                        .padding(
+                            start = 10.dp,
+                            top = 10.dp,
+                            bottom = 10.dp
+                        )
+                        .clickable {
+                            /* fun() */
+                        }
+                    ,
+                    text = item,
+                    textAlign = TextAlign.Start,
+                    style = TextStyle(
+                        color = TitleColor,
+                        fontFamily = FontFamily(Font(R.font.roboto_bold)),
+                        fontSize = 14.sp
+                    ),
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1
+                )
+                HorizontalDivider(
+                    modifier = Modifier.width(mostLong.dp*15),
+                    thickness = 1.dp,
+                    color = Color.LightGray
+                )
+            } else {
+                // non-header part
+                Column {
+                    Text(
+                        modifier = Modifier
+                            .padding(
+                                start = 10.dp,
+                                top = 10.dp,
+                                bottom = 10.dp
+                            )
+                        ,
+                        text = item,
+                        textAlign = TextAlign.Start,
+                        style = TextStyle(
+                            color = TitleColor,
+                            fontFamily = FontFamily(Font(R.font.roboto_regular)),
+                            fontSize = 14.sp
+                        ),
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 1
+                    )
+                    HorizontalDivider(
+                        modifier = Modifier.width(mostLong.dp*15),
+                        thickness = 1.dp,
+                        color = Color.LightGray
+                    )
+                }
+            }
+        }
+    }
 }
 
 @Composable
 fun DBTableId(
-    dataList: List<String>
+    data: List<String>
 ){
-
+    Column() {
+        val mostLong = data.maxOf { it.length }
+        data.forEachIndexed { index, item ->
+            // empty part
+            // list of number는 "","",1,2,3,4,5,... 형태로 나아감
+            // 즉 0번째, 1번째 인덱스는 빈 문자열
+            if (index == 0) {
+                Text(
+                    modifier = Modifier
+                        .padding(
+                            start = 10.dp,
+                            top = 10.dp,
+                            bottom = 10.dp
+                        )
+                        .clickable {
+                            /* fun() */
+                        },
+                    text = item,
+                    textAlign = TextAlign.Start,
+                    style = TextStyle(
+                        color = TitleColor,
+                        fontFamily = FontFamily(Font(R.font.roboto_bold)),
+                        fontSize = 14.sp
+                    ),
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1
+                )
+                HorizontalDivider(
+                    modifier = Modifier.width(mostLong.dp * 12),
+                    thickness = 1.dp,
+                    color = Color.LightGray
+                )
+                Text(
+                    modifier = Modifier
+                        .padding(
+                            start = 10.dp,
+                            top = 10.dp,
+                            bottom = 10.dp
+                        )
+                        .clickable {
+                            /* fun() */
+                        },
+                    text = "",
+                    textAlign = TextAlign.Start,
+                    style = TextStyle(
+                        color = TitleColor,
+                        fontFamily = FontFamily(Font(R.font.roboto_bold)),
+                        fontSize = 14.sp
+                    ),
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1
+                )
+                HorizontalDivider(
+                    modifier = Modifier.width(mostLong.dp * 12),
+                    thickness = 1.dp,
+                    color = Color.LightGray
+                )
+            } else {
+                // non-header part
+                Column {
+                    Text(
+                        modifier = Modifier
+                            .padding(
+                                start = 10.dp,
+                                top = 10.dp,
+                                bottom = 10.dp
+                            ),
+                        text = item,
+                        textAlign = TextAlign.Start,
+                        style = TextStyle(
+                            color = TextColor,
+                            fontFamily = FontFamily(Font(R.font.roboto_regular)),
+                            fontSize = 14.sp
+                        ),
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 1
+                    )
+                    HorizontalDivider(
+                        modifier = Modifier.width(mostLong.dp * 12),
+                        thickness = 1.dp,
+                        color = Color.LightGray
+                    )
+                }
+            }
+        }
+    }
 }
+@SuppressLint("RememberReturnType")
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DBTableText(
-    dataList: List<String>
+    data: List<String>
 ){
+    val input = remember { mutableStateOf("") }
+    val tmpData = remember{ mutableStateListOf<String>().apply { addAll(data) } }
+    val interactionSource = remember{ MutableInteractionSource() }
 
+    Column() {
+        val mostLong = tmpData.maxOf { it.length }
+        tmpData.forEachIndexed { index, item ->
+            // empty part
+            // list of number는 "","",1,2,3,4,5,... 형태로 나아감
+            // 즉 0번째, 1번째 인덱스는 빈 문자열
+            if (index == 0) {
+                Text(
+                    modifier = Modifier
+                        .padding(
+                            start = 10.dp,
+                            top = 10.dp,
+                            bottom = 10.dp
+                        )
+                        .clickable {
+                            /* fun() */
+                        },
+                    text = item,
+                    textAlign = TextAlign.Start,
+                    style = TextStyle(
+                        color = TitleColor,
+                        fontFamily = FontFamily(Font(R.font.roboto_bold)),
+                        fontSize = 14.sp
+                    ),
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1
+                )
+                HorizontalDivider(
+                    modifier = Modifier
+                        .width(mostLong.dp * 12),
+                    thickness = 1.dp,
+                    color = Color.LightGray
+                )
+                BasicTextField(
+                    // 필터 입력 후 Action에 대해 정의
+                    keyboardActions = KeyboardActions(
+                        // 예시)
+                        // 백엔드로 필터링 된 데이터 요청 함수
+                        // callFilter2Backend(input)
+                    ),
+                    value = input.value,
+                    onValueChange = {input.value = it},
+                    modifier = Modifier
+                        .width(mostLong.dp * 12)
+                        .height(55.dp)
+                        .width(50.dp)
+                        .zIndex(1f)
+                        .offset(
+                            x = -4.dp,
+                            y= -8.dp
+                        ),
+                    singleLine = true,
+                    textStyle = TextStyle(
+
+                        fontSize = 14.sp
+                    ),
+
+                    decorationBox = @Composable{ innerTextField ->
+                        TextFieldDefaults.DecorationBox(
+                            placeholder = {
+                                Text(
+                                    text = "Filter",
+                                    color = Color.LightGray,
+                                    style = TextStyle(
+                                        color = TitleColor,
+                                        fontFamily = FontFamily(Font(R.font.roboto_regular)),
+                                        fontSize = 14.sp
+                                    ),
+                                )
+                            },
+                            singleLine = true,
+                            visualTransformation = VisualTransformation.None,
+                            enabled = true,
+                            innerTextField = innerTextField,
+                            value = input.value,
+                            interactionSource = interactionSource,
+                            colors = TextFieldDefaults.colors(
+                                focusedTextColor = TextColor,
+                                unfocusedTextColor = TextColor,
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                                cursorColor = TextColor,
+                                unfocusedContainerColor = Color.Transparent,
+                                focusedContainerColor = Color.Transparent,
+                                errorContainerColor = Color.Transparent,
+                                disabledContainerColor = Color.Transparent
+                            )
+                        )
+                    }
+                )
+
+                HorizontalDivider(
+                    modifier = Modifier
+                        .width(mostLong.dp * 12)
+                        .offset(
+                            y = -18.5.dp
+                        )
+                    ,
+                    thickness = 1.dp,
+                    color = Color.LightGray
+                )
+            } else {
+                // non-header part
+                Column (
+                    modifier =
+                        Modifier.offset(
+                            y = -18.5.dp
+                        )
+                ){
+                    Text(
+                        modifier = Modifier
+                            .padding(
+                                start = 10.dp,
+                                top = 10.dp,
+                                bottom = 10.dp
+                            ),
+                        text = item,
+                        textAlign = TextAlign.Start,
+                        style = TextStyle(
+                            color = TextColor,
+                            fontFamily = FontFamily(Font(R.font.roboto_regular)),
+                            fontSize = 14.sp
+                        ),
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 1
+                    )
+                    HorizontalDivider(
+                        modifier = Modifier.width(mostLong.dp * 12),
+                        thickness = 1.dp,
+                        color = Color.LightGray
+                    )
+                }
+            }
+        }
+    }
 }
 
 
 // 데이터 넘버링 생성기
 fun DBTableNumberGenerator(
     start: Int
-) : MutableList<Int> {
-    val numberList:MutableList<Int> = mutableListOf()
+) : MutableList<String> {
+    val numberList:MutableList<String> = mutableListOf()
+    numberList.add("")
+    numberList.add("")
     for(i in start until start+50){
-        numberList.add(i)
+        numberList.add(i.toString())
     }
     return numberList
 }
