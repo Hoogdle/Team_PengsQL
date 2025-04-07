@@ -4,7 +4,6 @@ package com.example.vept.ed.L4
 import androidx.compose.runtime.Composable
 
 
-import android.content.Intent
 import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -18,23 +17,17 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -50,7 +43,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.vector.EmptyPath
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -61,8 +53,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
-import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import com.example.vept.ui.other.ArrowAndMenu
 import com.example.vept.R
 import com.example.vept.ui.theme.BackGroundColor
@@ -73,8 +64,6 @@ import com.example.vept.ui.theme.GreenBox
 import com.example.vept.ui.theme.TableBackGroundColor
 import com.example.vept.ui.theme.TextColor
 import com.example.vept.ui.theme.TitleColor
-
-import com.example.vept.ui.theme.BackGroundColor
 
 
 // =========================================================READ ME=========================================================
@@ -102,9 +91,8 @@ val dropDownSample = listOf("apple","banana","mango","orange","watermelon")
 
 @Composable
 fun EditTableModDesign(
-    viewModel: EditTableModViewModel
-
-    //navController: NavController
+    viewModel: EditTableModViewModel,
+    navController: NavHostController
 ){
 
 
@@ -124,11 +112,7 @@ fun EditTableModDesign(
         ){
             TableTitle("Table Name")
             TableButton(
-                text = "DB선택",
-                // navController와 nav의 목적지 등록
-                // 500 번째 줄로 가서 쓰임새를 확인해주세요.
-                //
-                //
+                text = "DB선택"
 
 
 
@@ -498,8 +482,8 @@ fun TableMarker(
 
 @Composable
 fun TableButton(
-    text: String
 
+    text: String
 ){
 
     val context = LocalContext.current
@@ -513,13 +497,6 @@ fun TableButton(
             )
         ,
         onClick = {
-            // null 확인
-            // 버튼 클릭시 등록한 화면으로 감
-
-            val intent = Intent(context, EditerMain::class.java)
-            intent.putExtra(EditerMain.EXTRA_DATABASE_NAME, EditTableMod.EXTRA_DATABASE_NAME)
-            context.startActivity(intent)
-
 
         },
         colors = ButtonColors(

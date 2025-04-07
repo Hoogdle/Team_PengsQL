@@ -1,30 +1,39 @@
 package com.example.vept.ed.L4
 
 import androidx.compose.ui.platform.ComposeView
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+
+
+
 
 object EditerComposableWrapper {
     @JvmStatic
-    fun setEditerComposableContent(composeView: ComposeView, viewModel: EditerMainViewModel) {
+    fun setNavComposableContent(
+        composeView: ComposeView,
+        mainViewModel: EditerMainViewModel,
+        cliViewModel: EditSqlCliViewModel,
+        listViewModel: EditTableListViewModel,
+        modViewModel: EditTableModViewModel
+    ) {
         composeView.setContent {
-            EditerMainDesign(viewModel)
+            val navController = rememberNavController()
+            NavHost(navController = navController, startDestination = "main") {
+                composable("main") {
+                    EditerMainDesign(mainViewModel, navController)
+                }
+                composable("sql") {
+                    EditSqlCliDesign(cliViewModel, navController)
+                }
+                composable("list") {
+                    EditTableListDesign(listViewModel, navController)
+                }
+                composable("mod") {
+                    EditTableModDesign(modViewModel, navController)
+                }
+            }
         }
     }
-    @JvmStatic
-    fun setSqlCliComposableContent(composeView: ComposeView, viewModel: EditSqlCliViewModel) {
-        composeView.setContent {
-            EditSqlCliDesign(viewModel)
-        }
-    }
-    @JvmStatic
-    fun setTableListComposableContent(composeView: ComposeView, viewModel: EditTableListViewModel) {
-        composeView.setContent {
-            EditTableListDesign(viewModel)
-        }
-    }
-    @JvmStatic
-    fun setTableModComposableContent(composeView: ComposeView, viewModel: EditTableModViewModel) {
-        composeView.setContent {
-            EditTableModDesign(viewModel)
-        }
-    }
+
 }

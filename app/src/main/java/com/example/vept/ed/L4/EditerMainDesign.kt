@@ -1,6 +1,5 @@
 package com.example.vept.ed.L4
 
-import android.content.Intent
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -8,9 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -25,13 +22,11 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -48,9 +43,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 
 import com.example.vept.ui.other.ArrowAndMenu
 import com.example.vept.R
@@ -65,7 +61,8 @@ import com.example.vept.ui.theme.TitleColor
 
 @Composable
 fun EditerMainDesign(
-    viewModel: EditerMainViewModel
+    viewModel: EditerMainViewModel,
+    navController: NavHostController
 ){
     Column (
         Modifier
@@ -86,7 +83,9 @@ fun EditerMainDesign(
 
             SelectDBButton(
                 text = "Table",
-
+                onNavigate = { destination ->
+                    navController.navigate(destination)
+                }
             )
             SelectDBButtonPack()
         }
@@ -423,7 +422,8 @@ fun SelectDBParent(
 
 @Composable
 fun SelectDBButton(
-    text: String
+    text: String,
+    onNavigate: (String) -> Unit
 ){
     val context = LocalContext.current
 
@@ -436,13 +436,12 @@ fun SelectDBButton(
                 end = 1.dp
             )
         ,
-        onClick = {
-            // null 확인
-            // 버튼 클릭시 등록한 화면으로 감
+        onClick = { //
+            onNavigate("mod")
             // 이동
-            val intent = Intent(context, EditTableMod::class.java)
-            intent.putExtra(EditTableMod.EXTRA_DATABASE_NAME, EditerMain.EXTRA_DATABASE_NAME)
-            context.startActivity(intent)
+            //val intent = Intent(context, EditTableMod::class.java)
+            //intent.putExtra(EditTableMod.EXTRA_DATABASE_NAME, EditerMain.EXTRA_DATABASE_NAME)
+            //context.startActivity(intent)
 
 
         },
@@ -480,9 +479,22 @@ fun SelectDBButtonPack(){
             )
             .clip(RoundedCornerShape(8.dp,8.dp,0.dp,0.dp))
     ){
-        SelectDBButton("테이블 생성")
-        SelectDBButton("인덱스 생성")
-        SelectDBButton("저장")
-        SelectDBButton("취소")
+        /*
+        SelectDBButton(
+            "테이블 생성",
+            navController = TODO()
+        )
+        SelectDBButton(
+            "인덱스 생성",
+            navController = TODO()
+        )
+        SelectDBButton(
+            "저장",
+            navController = TODO()
+        )
+        SelectDBButton(
+            "취소",
+            navController = TODO()
+        )*/
     }
 }
