@@ -1,16 +1,12 @@
 package com.example.vept.ed.L4;
 
+
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
-
 import com.example.vept.ed.L2.EditDB;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -53,17 +49,41 @@ public class EditerMainViewModel extends ViewModel {
         return triggerList;
     }
 
-
-    public List<String> getFieldNames(String tableName) {
-        Map<String, List<String>> map = tableFieldMap.getValue();
-        if (map != null) {
-            return map.getOrDefault(tableName, Collections.emptyList());
-        } else {
-            return Collections.emptyList();
-        }
+    // 특정 아이템을 조회하는 함수
+    public void viewItem(String name, String type) {
+        // 실제 데이터 조회 로직
+        // 예시: 단순히 로그 출력이나 데이터를 조회해서 반환하는 코드
+        System.out.println("Viewing item: " + name + " of type " + type);
+        // 이 부분에서 필요한 로직 추가 (예: DB 조회)
     }
 
-    public EditDB getEditDB() {
-        return editDB;
+    public void editItem(String name, String type) {
+        // 실제 수정 로직
+        // 예시: 단순히 로그 출력
+        System.out.println("Editing item: " + name + " of type " + type);
+        // 이 부분에서 필요한 수정 로직 추가 (예: DB 수정)
+    }
+
+    public void deleteItem(String name, String type) {
+        Log.d("삭제기능", "삭제 삭제 삭제");
+        Log.d("삭제기능", "Deleting item: " + name + " of type " + type);
+        switch (type) {
+            case "테이블":
+                //deleteTable(name);
+                break;
+            case "뷰":
+                //deleteView(name);
+                break;
+            case "인덱스":
+                //deleteIndex(name);
+                break;
+            case "트리거":
+                //deleteTrigger(name);
+                break;
+            default:
+                Log.w("삭제기능", "Unknown type: " + type);
+                break;
+        }
+
     }
 }

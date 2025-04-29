@@ -1,9 +1,9 @@
 package com.example.vept.ed.L4
 
+import android.util.Log
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -45,9 +45,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-
 import com.example.vept.ui.other.ArrowAndMenu
 import com.example.vept.R
 import com.example.vept.ui.theme.BackGroundColor
@@ -58,12 +56,13 @@ import com.example.vept.ui.theme.TextColor
 import com.example.vept.ui.theme.TitleColor
 
 
-
 @Composable
 fun EditerMainDesign(
     viewModel: EditerMainViewModel,
     navController: NavHostController
 ){
+
+
     Column (
         Modifier
             .background(BackGroundColor)
@@ -80,13 +79,10 @@ fun EditerMainDesign(
         ){
             SelectDBTitle(viewModel.databaseName)
 
+            //<<===디버그용===!!//
+            DebugDropdown(navController = navController)
+            //!!===디버그용===>>//
 
-            SelectDBButton(
-                text = "Table",
-                onNavigate = { destination ->
-                    navController.navigate(destination)
-                }
-            )
             SelectDBButtonPack()
         }
         SelectDBTemplate(viewModel)
@@ -110,168 +106,140 @@ fun SelectDBTitle(
     }
 }
 
+@Composable
+fun ToggleHeaderButton(isOpened: MutableState<Boolean>) {
+    Icon(
+        modifier = Modifier
+            .clickable { isOpened.value = !isOpened.value },
+        painter = painterResource(if (isOpened.value) R.drawable.small_down else R.drawable.right_arrow),
+        contentDescription = "",
+        tint = TextColor
+    )
+}
 
 @Composable
-fun SelectDBTemplate(viewModel: EditerMainViewModel){
+fun TextHeader(headName: String, size: Int) {
+    Text(
+        text = "$headName ($size)",
+        style = TextStyle(
+            color = TextColor,
+            fontFamily = FontFamily(Font(R.font.roboto_bold)),
+            fontSize = 16.sp
+        )
+    )
+}
+
+@Composable
+fun SelectDBTemplate(viewModel: EditerMainViewModel) {
     val indexInfoState by viewModel.indexInfo.observeAsState(emptyMap())
     val tableMap by viewModel.tableFieldMap.observeAsState(emptyMap())
     val viewMap by viewModel.viewInfo.observeAsState(emptyMap())
     val triggers by viewModel.triggerList.observeAsState(emptyList())
-    fun toSingleLayerMap(triggerList: List<String>): Map<String, List<String>> {
-        return triggerList.associateWith { emptyList() }
-    }
-    val triggerMap = toSingleLayerMap(triggers)
+
+    val triggerMap = triggers.associateWith { emptyList<String>() }
 
     val verticalScrollState = rememberScrollState()
-    val horizontalScrollState = rememberScrollState()
-    val tmpColumn: MutableList<String> = mutableListOf()
-    val tmpOneColumn: MutableList<String> = mutableListOf()
 
-    Row (modifier = Modifier
-        .fillMaxWidth()
-        .fillMaxHeight()
-        .background(BackGroundColor)
-        .clip(shape = RoundedCornerShape(35.dp, 35.dp, 0.dp, 0.dp))
-        .background(TableBackGroundColor)
-        .padding(
-            start = 30.dp,
-            end = 30.dp,
-        )
-        .verticalScroll(verticalScrollState)
-    ){
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight()
+            .background(BackGroundColor)
+            .clip(RoundedCornerShape(35.dp, 35.dp, 0.dp, 0.dp))
+            .background(TableBackGroundColor)
+            .padding(start = 30.dp, end = 30.dp)
+            .verticalScroll(verticalScrollState)
+    ) {
         Column {
-            SelectDBHeader(
-                headName = "테이블",
-                tableFieldMap = tableMap
-
-            )
-            Spacer(Modifier.height(30.dp))
-            HorizontalDivider(
-                thickness = 1.dp,
-                color = Color.LightGray
-
-            )
-            SelectDBHeader(
-                headName = "인덱스",
-                tableFieldMap = indexInfoState
-
-            )
-            Spacer(Modifier.height(30.dp))
-            HorizontalDivider(
-                thickness = 1.dp,
-                color = Color.LightGray
-
-            )
-            SelectDBHeader(
-                headName = "뷰",
-                tableFieldMap = viewMap
-
-            )
-            Spacer(Modifier.height(30.dp))
-            HorizontalDivider(
-                thickness = 1.dp,
-                color = Color.LightGray
-
-            )
-            SelectDBHeader(
-                headName = "트리거",
-                tableFieldMap = triggerMap
-            )
-            Spacer(Modifier.height(30.dp))
-            HorizontalDivider(
-                thickness = 1.dp,
-                color = Color.LightGray
-            )
+            SectionWithHeaderAndItems("테이블", tableMap, viewModel)
+            SectionWithHeaderAndItems("인덱스", indexInfoState, viewModel)
+            SectionWithHeaderAndItems("뷰", viewMap, viewModel)
+            SectionWithHeaderAndItems("트리거", triggerMap, viewModel)
         }
     }
+}
+
+@Composable
+fun SectionWithHeaderAndItems(
+    headerName: String,
+    items: Map<String, List<String>>,
+    viewModel: EditerMainViewModel
+) {
+    // 상태를 상위에서 관리하고 하위로 전달
+    val isOpened = remember { mutableStateOf(false) }
+    SelectDBHeader(
+        headName = headerName,
+        tableFieldMap = items,
+        isOpened = isOpened,
+        viewModel = viewModel
+    )
+    Spacer(Modifier.height(30.dp))
+    HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
 }
 
 @Composable
 fun SelectDBHeader(
     headName: String,
-    tableFieldMap: Map<String, List<String>>
+    tableFieldMap: Map<String, List<String>>,
+    isOpened: MutableState<Boolean>, // 상위에서 받은 isOpened 상태
+    viewModel: EditerMainViewModel // 추가
 ) {
-    val isOpened = remember{ mutableStateOf(false) }
-
     if (isOpened.value) {
         Column {
-            Spacer(Modifier.height(30.dp))
             Row {
-                Spacer(Modifier.width(10.dp))
-                Icon(
-                    modifier = Modifier
-                        .offset(x = 4.dp, y = 1.dp)
-                        .clickable { isOpened.value = false },
-                    painter = painterResource(R.drawable.small_down),
-                    contentDescription = "",
-                    tint = TextColor
-                )
-                Spacer(Modifier.width(10.dp))
-                Text(
-                    text = "$headName (${tableFieldMap.size})",
-                    style = TextStyle(
-                        color = TextColor,
-                        fontFamily = FontFamily(Font(R.font.roboto_bold)),
-                        fontSize = 16.sp
-                    )
-                )
+                ToggleHeaderButton(isOpened = isOpened)
+                TextHeader(headName = headName, size = tableFieldMap.size)
             }
-            tableFieldMap.forEach { (parentName, childList) ->
-                SelectDBParent(
-                    parentName = parentName,
-                    childList = childList,
-                    tableIsOpened = isOpened
+            tableFieldMap.forEach { (itemName, relatedList) ->
+                SelectTableItem(
+                    itemName = itemName,
+                    relatedList = relatedList,
+                    itemType = headName, // 각 항목에 맞는 자료형을 전달
+                    tableIsOpened = isOpened,
+                    onView = { name, type -> viewModel.viewItem(name, type) },
+                    onEdit = { name, type -> viewModel.editItem(name, type) },
+                    onDelete = { name, type ->
+                        Log.d("DBAction", "onDelete triggered: $name, $type")
+                        viewModel.deleteItem(name, type)  // deleteItem 호출
+                    }
+
                 )
             }
         }
     } else {
         Column {
-            Spacer(Modifier.height(30.dp))
             Row {
-                Spacer(Modifier.width(20.dp))
-                Icon(
-                    modifier = Modifier
-                        .offset(x = 1.dp, y = 3.dp)
-                        .clickable { isOpened.value = true },
-                    painter = painterResource(R.drawable.right_arrow),
-                    contentDescription = "",
-                    tint = TextColor
-                )
-                Spacer(Modifier.width(10.dp))
-                Text(
-                    text = "$headName (${tableFieldMap.keys.size})",
-                    style = TextStyle(
-                        color = TextColor,
-                        fontFamily = FontFamily(Font(R.font.roboto_bold)),
-                        fontSize = 16.sp
-                    )
-                )
+                ToggleHeaderButton(isOpened = isOpened)
+                TextHeader(headName = headName, size = tableFieldMap.keys.size)
             }
         }
     }
 }
 
 @Composable
-fun SelectDBParent(
-    tableIsOpened: MutableState<Boolean>,
-    parentName: String,
-    childList: List<String>
+fun SelectTableItem(
+    itemName: String,
+    relatedList: List<String>,
+    itemType: String, // 자료형에 따른 동작 처리
+    tableIsOpened: MutableState<Boolean>,// 부모에서 전달받은 상태
+    onView: (String, String) -> Unit,
+    onEdit: (String, String) -> Unit,
+    onDelete: (String, String) -> Unit
 ) {
-    // 트리거 전용: 자식 없음
-    val isTrigger = childList.isEmpty()
+    val isDropDownExpanded = remember { mutableStateOf(false) }
+    val isOpened = remember { mutableStateOf(false) }
+    val selectedAction = remember { mutableStateOf(-1) }
 
-    // 자식 DropDown condition
-    val isDropDownExpanded = remember {
-        mutableStateListOf<Boolean>().apply {
-            repeat(childList.size) { add(false) }
-        }
+    // 각 자료형에 따라 드롭다운 메뉴에서 제공할 옵션 다르게 설정
+    val dropdownItems = when (itemType) {
+        "테이블" -> listOf("보기", "수정", "삭제")
+        "뷰" -> listOf("보기", "삭제")
+        "인덱스" -> listOf("수정", "삭제")
+        "트리거" -> listOf("수정", "삭제")
+        else -> listOf()
     }
 
-    // 부모 DropDown condition
-    val isParentDropDownExpanded = remember { mutableStateOf(false) }
-    val itemPosition = remember { mutableStateOf(0) }
-    val isOpened = remember { mutableStateOf(false) }
-
+    // UI 구성
     if (tableIsOpened.value && isOpened.value) {
         Column {
             Spacer(Modifier.height(10.dp))
@@ -287,7 +255,7 @@ fun SelectDBParent(
                 )
                 Spacer(Modifier.width(2.5f.dp))
                 Text(
-                    text = parentName + if (!isTrigger) " (${childList.size})" else "",
+                    text = itemName + if (relatedList.isNotEmpty()) " (${relatedList.size})" else "",
                     style = TextStyle(
                         color = TextColor,
                         fontFamily = FontFamily(Font(R.font.roboto_regular)),
@@ -296,51 +264,19 @@ fun SelectDBParent(
                 )
             }
 
-            if (!isTrigger) {
-                childList.forEachIndexed { index, child ->
-                    Column {
-                        Spacer(Modifier.height(5.dp))
-                        Row {
-                            Spacer(Modifier.width(70.dp))
-                            Text(
-                                modifier = Modifier.clickable {
-                                    isDropDownExpanded[index] = true
-                                },
-                                text = child,
-                                style = TextStyle(
-                                    color = TextColor,
-                                    fontFamily = FontFamily(Font(R.font.roboto_thin)),
-                                    fontSize = 14.sp
-                                )
-                            )
-                            DropdownMenu(
-                                modifier = Modifier
-                                    .wrapContentSize()
-                                    .background(TableBackGroundColor)
-                                    .border(1.dp, TextColor, RectangleShape),
-                                expanded = isDropDownExpanded[index],
-                                onDismissRequest = {
-                                    isDropDownExpanded[index] = false
-                                }
-                            ) {
-                                DropdownMenuItem(
-                                    text = {
-                                        Text(
-                                            text = "테이블 보기",
-                                            style = TextStyle(
-                                                color = TextColor,
-                                                fontFamily = FontFamily(Font(R.font.roboto_regular)),
-                                                fontSize = 14.sp
-                                            )
-                                        )
-                                    },
-                                    onClick = {
-                                        isDropDownExpanded[index] = false
-                                    }
-                                )
-                            }
-                        }
-                    }
+            // 관련 항목 단순 표시
+            relatedList.forEach { related ->
+                Spacer(Modifier.height(5.dp))
+                Row {
+                    Spacer(Modifier.width(70.dp))
+                    Text(
+                        text = related,
+                        style = TextStyle(
+                            color = TextColor,
+                            fontFamily = FontFamily(Font(R.font.roboto_thin)),
+                            fontSize = 14.sp
+                        )
+                    )
                 }
             }
         }
@@ -360,9 +296,9 @@ fun SelectDBParent(
                 Spacer(Modifier.width(7.dp))
                 Text(
                     modifier = Modifier.clickable {
-                        isParentDropDownExpanded.value = true
+                        isDropDownExpanded.value = true
                     },
-                    text = parentName + if (!isTrigger) " (${childList.size})" else "",
+                    text = itemName + if (relatedList.isNotEmpty()) " (${relatedList.size})" else "",
                     style = TextStyle(
                         color = TextColor,
                         fontFamily = FontFamily(Font(R.font.roboto_regular)),
@@ -374,49 +310,47 @@ fun SelectDBParent(
                         .wrapContentSize()
                         .background(TableBackGroundColor)
                         .border(1.dp, TextColor, RectangleShape),
-                    expanded = isParentDropDownExpanded.value,
+                    expanded = isDropDownExpanded.value,
                     onDismissRequest = {
-                        isParentDropDownExpanded.value = false
+                        isDropDownExpanded.value = false
                     }
                 ) {
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                text = "테이블 수정",
-                                style = TextStyle(
-                                    color = TextColor,
-                                    fontFamily = FontFamily(Font(R.font.roboto_regular)),
-                                    fontSize = 14.sp
-                                )
-                            )
-                        },
-                        onClick = {
-                            isParentDropDownExpanded.value = false
-                            itemPosition.value = 0
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                text = "테이블 삭제",
-                                style = TextStyle(
-                                    color = TextColor,
-                                    fontFamily = FontFamily(Font(R.font.roboto_regular)),
-                                    fontSize = 14.sp
-                                )
-                            )
-                        },
-                        onClick = {
-                            isParentDropDownExpanded.value = false
-                            itemPosition.value = 1
-                        }
-                    )
+                    // 드롭다운 항목 표시
+                    Log.d("DBAction", "작동111")
+                    dropdownItems.forEach { action ->
+                        DropdownMenuItem(
+                            text = { Text(action, style = dropdownTextStyle()) },
+                            onClick = {
+                                selectedAction.value = dropdownItems.indexOf(action)
+                                isDropDownExpanded.value = false
+
+                                Log.d("DBAction", "작동222")
+
+                                // 동작에 따른 처리를 추가
+                                when (action) {
+                                    "보기" -> onView(itemName, itemType)
+                                    "수정" -> onEdit(itemName, itemType)
+                                    "삭제" -> onDelete(itemName, itemType)
+                                }
+                            }
+                        )
+                    }
                 }
             }
         }
     }
 }
 
+
+// 스타일 재사용 함수
+@Composable
+fun dropdownTextStyle(): TextStyle {
+    return TextStyle(
+        color = TextColor,
+        fontFamily = FontFamily(Font(R.font.roboto_regular)),
+        fontSize = 14.sp
+    )
+}
 
 
 
@@ -464,7 +398,6 @@ fun SelectDBButton(
         )
     }
 }
-
 
 @Composable
 fun SelectDBButtonPack(){

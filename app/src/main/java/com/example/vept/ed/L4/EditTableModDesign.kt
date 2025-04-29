@@ -1,9 +1,7 @@
 package com.example.vept.ed.L4
 
-
 import androidx.compose.runtime.Composable
-
-
+import androidx.navigation.NavHostController
 import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -43,7 +41,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -53,9 +50,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
-import com.example.vept.ui.other.ArrowAndMenu
+import androidx.navigation.NavController
 import com.example.vept.R
+
+import com.example.vept.ui.other.ArrowAndMenu
 import com.example.vept.ui.theme.BackGroundColor
 import com.example.vept.ui.theme.ButtonColor
 import com.example.vept.ui.theme.ButtonTextColor
@@ -65,6 +63,10 @@ import com.example.vept.ui.theme.TableBackGroundColor
 import com.example.vept.ui.theme.TextColor
 import com.example.vept.ui.theme.TitleColor
 
+
+
+import com.example.vept.ed.L4L.dropDownSample
+import com.example.vept.ed.L4L.tableDataSamples
 
 // =========================================================READ ME=========================================================
 // 구현 난이도가 꽤 있어서 주석을 충분히 달지는 못했습니다.
@@ -79,13 +81,15 @@ import com.example.vept.ui.theme.TitleColor
 // 이 사항은 추후에 상의하는게 좋을 거 같습니다.
 // =========================================================READ ME=========================================================
 
-//더미
-val columnsTableData = listOf("Field Name", "Data Type", "NN", "PK", "AI", "U", "Default Value", "Collation", "Foreign Key")
-val sample1 = listOf("Hi","String","true","true","false","true","hellohellohellohellohellohello","whathellohello","ishellohellohello ithellohellohellohellohellohello")
 
-val tableDataSamples = listOf(columnsTableData,sample1, sample1, sample1,sample1,sample1,sample1,sample1,sample1, sample1, sample1,sample1,sample1,sample1,sample1)
-val dropDownSample = listOf("apple","banana","mango","orange","watermelon")
-
+/*
+*   main에서 테이블을 던져줘야함
+*   현재는 그냥 출력 형태임 이러면 안되지
+*   그럼에도 수정 될 수 있어야 하나>?
+*
+*
+*
+* */
 
 
 
@@ -94,8 +98,6 @@ fun EditTableModDesign(
     viewModel: EditTableModViewModel,
     navController: NavHostController
 ){
-
-
     Column (
         Modifier
             .background(BackGroundColor)
@@ -111,13 +113,13 @@ fun EditTableModDesign(
             horizontalArrangement = Arrangement.SpaceBetween
         ){
             TableTitle("Table Name")
-            TableButton(
-                text = "DB선택"
 
 
 
+            //<<===디버그용===!!//
+            ReturnToMainButton(navController)
+            //!!===디버그용===>>//
 
-            )
             TableButtonPack()
         }
         TableTemplate(tableDataSamples)
@@ -482,11 +484,10 @@ fun TableMarker(
 
 @Composable
 fun TableButton(
-
-    text: String
+    text: String,
+    navController: NavController? = null,
+    navDestination: String? = null
 ){
-
-    val context = LocalContext.current
     Button(
         contentPadding = PaddingValues(7.dp),
         modifier = Modifier
@@ -497,7 +498,11 @@ fun TableButton(
             )
         ,
         onClick = {
-
+            // null 확인
+            // 버튼 클릭시 등록한 화면으로 감
+            if(navController != null && navDestination != null){
+                navController.navigate(navDestination)
+            }
         },
         colors = ButtonColors(
             contentColor = ButtonTextColor,
@@ -529,9 +534,9 @@ fun TableButtonPack(){
             )
             .offset(
                 x = -50.dp,
-                y=3.dp
+                y = 3.dp
             )
-            .clip(RoundedCornerShape(8.dp,8.dp,0.dp,0.dp))
+            .clip(RoundedCornerShape(8.dp, 8.dp, 0.dp, 0.dp))
     ){
         TableButton("추가")
         TableButton("삭제")
@@ -597,3 +602,4 @@ fun HorizontalDividers(
         )
     }
 }
+
