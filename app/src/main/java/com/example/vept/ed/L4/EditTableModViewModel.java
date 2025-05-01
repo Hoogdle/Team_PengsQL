@@ -9,9 +9,23 @@ public class EditTableModViewModel  extends ViewModel {
 
     private EditDB editDB;
     private String databaseName;
-
+    private String itemName;
+    private String itemType;
     public void setEditDB(EditDB db) {
         this.editDB = db;
+    }
+
+    public void setItemInfo(String name, String type) {
+        this.itemName = name;
+        this.itemType = type;
+    }
+
+    public String getItemName() {
+        return itemName;
+    }
+
+    public String getItemType() {
+        return itemType;
     }
 
 }

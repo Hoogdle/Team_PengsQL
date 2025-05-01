@@ -230,10 +230,6 @@ public class EditDB extends SQLiteOpenHelper {
         return triggerNames;
     }
 
-
-
-
-
     public List<String> getTableNames() { // 레거시 코드 종속성 문제 해결될때까지 유지중
         List<String> tableNames = new ArrayList<>();
         Cursor cursor = db.rawQuery("SELECT name FROM sqlite_master WHERE type='table';", null);
@@ -326,6 +322,85 @@ public class EditDB extends SQLiteOpenHelper {
             DataList.add(tmpList);
         }
     }
+
+
+    public void deleteTable(String tableName) {
+        try {
+            db.execSQL("DROP TABLE IF EXISTS `" + tableName + "`;");
+            Log.d("EditDB", "테이블 삭제됨: " + tableName);
+        } catch (Exception e) {
+            Log.e("EditDB", "테이블 삭제 실패: " + tableName, e);
+        }
+    }
+
+    public void deleteView(String viewName) {
+        try {
+            db.execSQL("DROP VIEW IF EXISTS `" + viewName + "`;");
+            Log.d("EditDB", "뷰 삭제됨: " + viewName);
+        } catch (Exception e) {
+            Log.e("EditDB", "뷰 삭제 실패: " + viewName, e);
+        }
+    }
+
+    public void deleteIndex(String indexName) {
+        try {
+            db.execSQL("DROP INDEX IF EXISTS `" + indexName + "`;");
+            Log.d("EditDB", "인덱스 삭제됨: " + indexName);
+        } catch (Exception e) {
+            Log.e("EditDB", "인덱스 삭제 실패: " + indexName, e);
+        }
+    }
+
+    public void deleteTrigger(String triggerName) {
+        try {
+            db.execSQL("DROP TRIGGER IF EXISTS `" + triggerName + "`;");
+            Log.d("EditDB", "트리거 삭제됨: " + triggerName);
+        } catch (Exception e) {
+            Log.e("EditDB", "트리거 삭제 실패: " + triggerName, e);
+        }
+    }
+
+
+    public List<List<String>> getTablePageDataRaw(String tableName, int page, int pageSize) {
+        List<List<String>> result = new ArrayList<>();
+        int offset = (page - 1) * pageSize;
+
+        try {
+            String query = "SELECT * FROM `" + tableName + "` LIMIT " + pageSize + " OFFSET " + offset;
+            Cursor cursor = db.rawQuery(query, null);
+
+            int columnCount = cursor.getColumnCount();
+
+            while (cursor.moveToNext()) {
+                List<String> row = new ArrayList<>();
+                for (int i = 0; i < columnCount; i++) {
+                    row.add(cursor.getString(i));
+                }
+                result.add(row);
+            }
+            cursor.close();
+        } catch (Exception e) {
+            Log.e("EditDB", "getTablePageDataRaw 실패", e);
+        }
+
+        return result;
+    }
+
+    public int getRowCount(String tableName) {
+        int count = 0;
+        try {
+            Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM `" + tableName + "`", null);
+            if (cursor.moveToFirst()) {
+                count = cursor.getInt(0);
+            }
+            cursor.close();
+        } catch (Exception e) {
+            Log.e("EditDB", "getRowCountRaw 실패", e);
+        }
+        return count;
+    }
+
+
 
     @Override
     public void onCreate(SQLiteDatabase db) {

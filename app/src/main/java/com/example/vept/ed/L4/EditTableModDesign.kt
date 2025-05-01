@@ -97,7 +97,16 @@ import com.example.vept.ed.L4L.tableDataSamples
 fun EditTableModDesign(
     viewModel: EditTableModViewModel,
     navController: NavHostController
-){
+) {
+    val itemName = viewModel.getItemName() ?: "이름 없음"
+    val itemType = viewModel.getItemType() ?: "타입 없음"
+
+    Column {
+        ReturnToMainButton(navController)
+        Text(text = "EditTableModDesign에서 수정할 항목: $itemName ($itemType)")  // 조회 항목 출력
+    }
+}
+    /*
     Column (
         Modifier
             .background(BackGroundColor)
@@ -603,3 +612,4 @@ fun HorizontalDividers(
     }
 }
 
+*/

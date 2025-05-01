@@ -85,7 +85,7 @@ fun EditerMainDesign(
 
             SelectDBButtonPack()
         }
-        SelectDBTemplate(viewModel)
+        SelectDBTemplate(viewModel, navController)
     }
 }
 @Composable
@@ -130,7 +130,10 @@ fun TextHeader(headName: String, size: Int) {
 }
 
 @Composable
-fun SelectDBTemplate(viewModel: EditerMainViewModel) {
+fun SelectDBTemplate(
+    viewModel: EditerMainViewModel,
+    navController : NavHostController
+) {
     val indexInfoState by viewModel.indexInfo.observeAsState(emptyMap())
     val tableMap by viewModel.tableFieldMap.observeAsState(emptyMap())
     val viewMap by viewModel.viewInfo.observeAsState(emptyMap())
@@ -151,10 +154,10 @@ fun SelectDBTemplate(viewModel: EditerMainViewModel) {
             .verticalScroll(verticalScrollState)
     ) {
         Column {
-            SectionWithHeaderAndItems("테이블", tableMap, viewModel)
-            SectionWithHeaderAndItems("인덱스", indexInfoState, viewModel)
-            SectionWithHeaderAndItems("뷰", viewMap, viewModel)
-            SectionWithHeaderAndItems("트리거", triggerMap, viewModel)
+            SectionWithHeaderAndItems("테이블", tableMap, viewModel, navController)
+            SectionWithHeaderAndItems("인덱스", indexInfoState, viewModel, navController)
+            SectionWithHeaderAndItems("뷰", viewMap, viewModel, navController)
+            SectionWithHeaderAndItems("트리거", triggerMap, viewModel, navController)
         }
     }
 }
@@ -163,7 +166,8 @@ fun SelectDBTemplate(viewModel: EditerMainViewModel) {
 fun SectionWithHeaderAndItems(
     headerName: String,
     items: Map<String, List<String>>,
-    viewModel: EditerMainViewModel
+    viewModel: EditerMainViewModel,
+    navController: NavHostController
 ) {
     // 상태를 상위에서 관리하고 하위로 전달
     val isOpened = remember { mutableStateOf(false) }
@@ -171,7 +175,8 @@ fun SectionWithHeaderAndItems(
         headName = headerName,
         tableFieldMap = items,
         isOpened = isOpened,
-        viewModel = viewModel
+        viewModel = viewModel,
+        navController = navController
     )
     Spacer(Modifier.height(30.dp))
     HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
@@ -182,7 +187,8 @@ fun SelectDBHeader(
     headName: String,
     tableFieldMap: Map<String, List<String>>,
     isOpened: MutableState<Boolean>, // 상위에서 받은 isOpened 상태
-    viewModel: EditerMainViewModel // 추가
+    viewModel: EditerMainViewModel, // 추가
+    navController: NavHostController
 ) {
     if (isOpened.value) {
         Column {
@@ -194,10 +200,14 @@ fun SelectDBHeader(
                 SelectTableItem(
                     itemName = itemName,
                     relatedList = relatedList,
-                    itemType = headName, // 각 항목에 맞는 자료형을 전달
+                    itemType = headName,
                     tableIsOpened = isOpened,
-                    onView = { name, type -> viewModel.viewItem(name, type) },
-                    onEdit = { name, type -> viewModel.editItem(name, type) },
+                    onView = { name, type ->
+                        viewModel.viewItem(name, type, navController)
+                    },
+                    onEdit = { name, type ->
+                        viewModel.editItem(name, type, navController)
+                    },
                     onDelete = { name, type ->
                         Log.d("DBAction", "onDelete triggered: $name, $type")
                         viewModel.deleteItem(name, type)  // deleteItem 호출

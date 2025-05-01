@@ -1,11 +1,16 @@
 package com.example.vept.ed.L4;
 
 
+import android.net.Uri;
+import android.os.Bundle;
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+import androidx.navigation.NavController;
+import androidx.navigation.NavHostController;
+
 import com.example.vept.ed.L2.EditDB;
 import java.util.List;
 import java.util.Map;
@@ -19,15 +24,14 @@ public class EditerMainViewModel extends ViewModel {
     private final MutableLiveData<Map<String, List<String>>> tableFieldMap = new MutableLiveData<>();
     private final MutableLiveData<Map<String, List<String>>> viewInfo = new MutableLiveData<>();
     private final MutableLiveData<List<String>> triggerList = new MutableLiveData<>();
-
     public void setEditDB(EditDB db) {
         this.editDB = db;
-        this.tableFieldMap.setValue(db.getTableAndFieldName());
-        this.indexInfo.setValue(db.getIndexInfo());
-        Map<String, List<String>> result = editDB.getViewInfo();
-        viewInfo.setValue(result);
-        List<String> result1 = editDB.getTriggerNames();
-        triggerList.setValue(result1);
+
+
+        tableFieldMap.setValue(db.getTableAndFieldName());
+        indexInfo.setValue(db.getIndexInfo());
+        viewInfo.setValue(db.getViewInfo());
+        triggerList.setValue(db.getTriggerNames());
     }
     public void setDatabaseName(String databaseName) {
         this.databaseName = databaseName;
@@ -48,42 +52,55 @@ public class EditerMainViewModel extends ViewModel {
     public LiveData<List<String>> getTriggerList() {
         return triggerList;
     }
-
-    // 특정 아이템을 조회하는 함수
-    public void viewItem(String name, String type) {
-        // 실제 데이터 조회 로직
-        // 예시: 단순히 로그 출력이나 데이터를 조회해서 반환하는 코드
-        System.out.println("Viewing item: " + name + " of type " + type);
-        // 이 부분에서 필요한 로직 추가 (예: DB 조회)
+    public void viewItem(String name, String type, NavController navController) {
+        if ("테이블".equals(type) || "뷰".equals(type)) {
+            String route = "list?name=" + Uri.encode(name) + "&type=" + Uri.encode(type);
+            navController.navigate(route);
+        } else {
+            Log.w("조회기능", "Unknown type: " + type);
+        }
     }
 
-    public void editItem(String name, String type) {
-        // 실제 수정 로직
-        // 예시: 단순히 로그 출력
-        System.out.println("Editing item: " + name + " of type " + type);
-        // 이 부분에서 필요한 수정 로직 추가 (예: DB 수정)
+    public void editItem(String name, String type, NavController navController) {
+        String encodedName = Uri.encode(name);
+        String encodedType = Uri.encode(type);
+
+        switch (type) {
+            case "테이블":
+                navController.navigate("mod?name=" + encodedName + "&type=" + encodedType);
+                break;
+            case "인덱스":
+            case "트리거":
+                navController.navigate("sql?name=" + encodedName + "&type=" + encodedType);
+                break;
+            default:
+                Log.w("수정기능", "Unknown type: " + type);
+                break;
+        }
     }
 
     public void deleteItem(String name, String type) {
-        Log.d("삭제기능", "삭제 삭제 삭제");
         Log.d("삭제기능", "Deleting item: " + name + " of type " + type);
         switch (type) {
             case "테이블":
-                //deleteTable(name);
+                editDB.deleteTable(name);
+                this.tableFieldMap.setValue(editDB.getTableAndFieldName());
                 break;
             case "뷰":
-                //deleteView(name);
+                editDB.deleteView(name);
+                this.viewInfo.setValue(editDB.getViewInfo());
                 break;
             case "인덱스":
-                //deleteIndex(name);
+                editDB.deleteIndex(name);
+                this.indexInfo.setValue(editDB.getIndexInfo());
                 break;
             case "트리거":
-                //deleteTrigger(name);
+                editDB.deleteTrigger(name);
+                this.triggerList.setValue(editDB.getTriggerNames());
                 break;
             default:
                 Log.w("삭제기능", "Unknown type: " + type);
                 break;
         }
-
     }
 }
