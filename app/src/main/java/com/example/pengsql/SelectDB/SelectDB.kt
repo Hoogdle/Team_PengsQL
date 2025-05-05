@@ -1,13 +1,9 @@
 package com.example.pengsql.SelectDB
 
-import android.text.BoringLayout
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -47,18 +43,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.NavDestination
 import com.example.pengsql.Others.ArrowAndMenu
 import com.example.pengsql.R
-import com.example.pengsql.Table.TableButtonPack
-import com.example.pengsql.Table.TableDropDown
-import com.example.pengsql.Table.TableMarker
-import com.example.pengsql.Table.TableTemplate
-import com.example.pengsql.Table.TableText
-import com.example.pengsql.Table.TableTitle
-import com.example.pengsql.Table.VerticalDividers
-import com.example.pengsql.Table.dropDownSample
-import com.example.pengsql.Table.tableDataSamples
 import com.example.pengsql.ui.theme.BackGroundColor
 import com.example.pengsql.ui.theme.ButtonColor
 import com.example.pengsql.ui.theme.ButtonTextColor
@@ -244,7 +230,7 @@ fun SelectDBHeader(
                         .clickable {
                             isOpened.value = true
                         },
-                    painter = painterResource(R.drawable.right_arrow),
+                    painter = painterResource(R.drawable.cli_right_arrow),
                     contentDescription = "",
                     tint = TextColor
                 )
@@ -376,7 +362,7 @@ fun SelectDBParent(
                         .clickable {
                             isOpened.value = true
                         },
-                    painter = painterResource(R.drawable.right_arrow),
+                    painter = painterResource(R.drawable.cli_right_arrow),
                     contentDescription = "",
                     tint = TextColor
                 )

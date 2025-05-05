@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
+import com.example.pengsql.CLI.CLI
 import com.example.pengsql.Navigation.PageNav
 import com.example.pengsql.SelectDB.SelectDB
 import com.example.pengsql.Table.Table
@@ -24,7 +25,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            PageNav()
+            CLI()
         }
     }
 }
