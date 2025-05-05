@@ -1,40 +1,60 @@
 package com.example.pengsql.CLI
 
+import android.widget.Space
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.pengsql.Others.ArrowAndMenu
 import com.example.pengsql.R
 import com.example.pengsql.SelectDB.SelectDBTitle
+import com.example.pengsql.Table.VerticalDividers
 import com.example.pengsql.ui.theme.BackGroundColor
 import com.example.pengsql.ui.theme.ButtonColor
 import com.example.pengsql.ui.theme.ButtonTextColor
+import com.example.pengsql.ui.theme.TableBackGroundColor
+import com.example.pengsql.ui.theme.TextColor
 
 @Composable
 fun CLI(){
@@ -55,6 +75,7 @@ fun CLI(){
             SelectDBTitle("SQL Name")
             CLIButtonPack()
         }
+        CLITemplate()
     }
 }
 
@@ -116,4 +137,151 @@ fun CLIButtonPack(){
         CLIButton(R.drawable.clf_left_arrow)
         CLIButton(R.drawable.cli_cancel, size = 19.dp)
     }
+}
+
+@Composable
+fun CLITemplate(){
+    val verticalScrollState = rememberScrollState()
+    val horizontalScrollState = rememberScrollState()
+    val inputs = List(300){ remember { mutableStateOf("") }}
+    Column (
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight()
+            .background(BackGroundColor)
+            .clip(shape = RoundedCornerShape(35.dp, 35.dp, 0.dp, 0.dp))
+            .background(TableBackGroundColor)
+            .padding(
+                start = 30.dp,
+                end = 30.dp,
+            )
+            .verticalScroll(verticalScrollState)
+            .horizontalScroll(horizontalScrollState)
+    ){
+        Column {
+            for(i in 0..299){
+                    CLIOneLine(i+1,inputs[i], offset = -(i*28).dp)
+            }
+        }
+    }
+}
+
+
+@Composable
+fun CLIOneLine(
+    lineNo: Int,
+    lineContents: MutableState<String>,
+    offset: Dp = 0.dp
+){
+    Row(
+        modifier = Modifier
+            .offset(
+                y = offset
+            )
+    ){
+        Text(
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(35.dp)
+                .offset(
+                    x = 15.dp,
+                    y = 20.dp
+                ),
+            text = lineNo.toString(),
+            style = TextStyle(
+                color = TextColor,
+                fontFamily = FontFamily(Font(R.font.roboto_bold)),
+                fontSize = 20.sp
+            )
+        )
+        Spacer(Modifier.width(8.dp))
+        VerticalDividers(
+            modifier = Modifier
+                .height(33.dp)
+                .offset(
+                    x = 20.dp,
+                    y = 20.dp
+                )
+            ,
+            thickness = 1.dp,
+            color = Color.LightGray
+        )
+        Spacer(Modifier.width(8.dp))
+        CLITextField(lineContents)
+    }
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CLITextField(
+    input: MutableState<String>
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+
+    BasicTextField(
+        // 필터 입력 후 Action에 대해 정의
+        keyboardActions = KeyboardActions(
+            // 예시)
+            // 백엔드로 필터링 된 데이터 요청 함수
+            // callFilter2Backend(input)
+
+            // 선택된 페이지에 관한 데이터는 이 함수의 input 변수를 활용
+            onDone = {}
+        ),
+        value = input.value,
+        onValueChange = {
+            input.value = it
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                start = 10.dp,
+                end = 10.dp
+            )
+            .clip(RoundedCornerShape(15.dp))
+            .background(
+                color = Color.Transparent
+            )
+            .height(60.dp),
+        singleLine = true,
+        textStyle = TextStyle(
+            color = TextColor,
+            fontFamily = FontFamily(Font(R.font.pretendard_regular)),
+            fontSize = 20.sp
+        ),
+
+        decorationBox = @Composable { innerTextField ->
+            TextFieldDefaults.DecorationBox(
+                placeholder = {
+                    Text(
+                        text = "text",
+                        color = Color.LightGray,
+                        style = TextStyle(
+                            color = TextColor,
+                            fontFamily = FontFamily(Font(R.font.roboto_regular)),
+                            fontSize = 20.sp
+                        ),
+                    )
+                },
+                singleLine = true,
+                visualTransformation = VisualTransformation.None,
+                enabled = true,
+                innerTextField = innerTextField,
+                value = input.value.toString(),
+                interactionSource = interactionSource,
+                colors = TextFieldDefaults.colors(
+                    focusedTextColor = TextColor,
+                    unfocusedTextColor = TextColor,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    cursorColor = TextColor,
+                    unfocusedContainerColor = Color.Transparent,
+                    focusedContainerColor = Color.Transparent,
+                    errorContainerColor = Color.Transparent,
+                    disabledContainerColor = Color.Transparent
+                ),
+            )
+        }
+    )
 }
