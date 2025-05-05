@@ -1,5 +1,6 @@
 package com.example.pengsql.CLI
 
+import android.util.Log
 import android.widget.Space
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -21,6 +22,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
@@ -39,6 +41,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -58,6 +61,12 @@ import com.example.pengsql.ui.theme.TextColor
 
 @Composable
 fun CLI(){
+
+    // CLI 각 라인별 명령어를 저장
+    val inputs = List(300){ remember { mutableStateOf("") }}
+
+    // 실행 버튼 클릭시 아래의 변수에 명령어를 저장, 위 inputs 변수의 모든 값을 더한 후 optResult 변수에 넣기
+    val optResult = remember { mutableStateOf("") }
     Column (
         Modifier
             .background(BackGroundColor)
@@ -73,9 +82,12 @@ fun CLI(){
             horizontalArrangement = Arrangement.SpaceBetween
         ){
             SelectDBTitle("SQL Name")
-            CLIButtonPack()
+            CLIButtonPack(
+                inputs = inputs,
+                optResult = optResult
+            )
         }
-        CLITemplate()
+        CLITemplate(inputs)
     }
 }
 
@@ -85,7 +97,7 @@ fun CLIButton(
     navController: NavController? = null,
     navDestination: String? = null,
     size: Dp = 15.dp,
-
+    onClick : () -> Unit = {}
 ){
     Button(
         contentPadding = PaddingValues(7.dp),
@@ -97,11 +109,7 @@ fun CLIButton(
             )
         ,
         onClick = {
-            // null 확인
-            // 버튼 클릭시 등록한 화면으로 감
-            if(navController != null && navDestination != null){
-                navController.navigate(navDestination)
-            }
+            onClick()
         },
         colors = ButtonColors(
             contentColor = ButtonTextColor,
@@ -121,7 +129,10 @@ fun CLIButton(
 
 
 @Composable
-fun CLIButtonPack(){
+fun CLIButtonPack(
+    inputs: List<MutableState<String>>,
+    optResult : MutableState<String>
+){
     Row (
         Modifier
             .padding(
@@ -133,17 +144,31 @@ fun CLIButtonPack(){
             )
             .clip(RoundedCornerShape(8.dp,8.dp,0.dp,0.dp))
     ){
-        CLIButton(R.drawable.cli_right_arrow)
+        CLIButton(
+            R.drawable.cli_right_arrow,
+            onClick = {
+                val tmp = mutableStateOf("")
+                for(i in 0..inputs.size-1){
+                    tmp.value += inputs[i].value + "\n"
+                }
+                if(tmp!=null){
+                    optResult.value = tmp.value
+
+                }
+                Log.e("ddd","command is : ${optResult.value}")
+            }
+        )
         CLIButton(R.drawable.clf_left_arrow)
         CLIButton(R.drawable.cli_cancel, size = 19.dp)
     }
 }
 
 @Composable
-fun CLITemplate(){
+fun CLITemplate(
+    inputs: List<MutableState<String>>
+){
     val verticalScrollState = rememberScrollState()
     val horizontalScrollState = rememberScrollState()
-    val inputs = List(300){ remember { mutableStateOf("") }}
     Column (
         modifier = Modifier
             .fillMaxWidth()
@@ -185,7 +210,7 @@ fun CLIOneLine(
                 .width(35.dp)
                 .offset(
                     x = 15.dp,
-                    y = 20.dp
+                    y = 19.5f.dp
                 ),
             text = lineNo.toString(),
             style = TextStyle(
@@ -221,13 +246,18 @@ fun CLITextField(
 
     BasicTextField(
         // 필터 입력 후 Action에 대해 정의
+        keyboardOptions = KeyboardOptions(
+            imeAction = ImeAction.Next
+        ),
         keyboardActions = KeyboardActions(
             // 예시)
             // 백엔드로 필터링 된 데이터 요청 함수
             // callFilter2Backend(input)
 
             // 선택된 페이지에 관한 데이터는 이 함수의 input 변수를 활용
-            onDone = {}
+            onDone = {
+
+            }
         ),
         value = input.value,
         onValueChange = {
