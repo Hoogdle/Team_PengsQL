@@ -1,7 +1,17 @@
 package com.example.pengsql.CLI
 
+import android.text.BoringLayout
 import android.util.Log
 import android.widget.Space
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -13,6 +23,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -32,8 +43,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -68,6 +82,7 @@ fun CLI(){
 
     // 실행 버튼 클릭시 아래의 변수에 명령어를 저장, 위 inputs 변수의 모든 값을 더한 후 optResult 변수에 넣기
     val optResult = remember { mutableStateOf("") }
+    var visible = remember { mutableStateOf(false) }
     Column (
         Modifier
             .background(BackGroundColor)
@@ -90,7 +105,12 @@ fun CLI(){
         }
         CLITemplate(inputs)
     }
+    
+    // 결과화면을 보기 위한 버튼
     Button(
+        onClick = {
+            visible.value = !visible.value
+        },
         shape = RectangleShape,
         colors = ButtonColors(
             contentColor = Color.Transparent,
@@ -107,7 +127,6 @@ fun CLI(){
             .width(150.dp)
             .clip(RoundedCornerShape(8.dp))
             ,
-        onClick = {}
     ) {
         Image(
             modifier = Modifier
@@ -117,6 +136,16 @@ fun CLI(){
                 ),
             painter = painterResource(R.drawable.cli_up),
             contentDescription = ""
+        )
+    }
+    AnimatedVisibility(
+        visible.value,
+        enter = slideInVertically(initialOffsetY = { +300 }) + expandVertically(expandFrom = Alignment.Bottom) + fadeIn(initialAlpha = 0.3f),
+        exit = slideOutVertically() + shrinkVertically() + fadeOut() + scaleOut(targetScale = 1.2f)
+    ) {
+        CLIResult(
+            visible,
+            "까꿍"
         )
     }
 }
@@ -344,4 +373,69 @@ fun CLITextField(
             )
         }
     )
+}
+
+@Composable
+fun CLIResult(
+    visible: MutableState<Boolean>,
+    result: String
+){
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ){
+        // 쿼리문 실행 결과 영역////////////////////////////////
+        Text(
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center,
+            text = result,
+            style = TextStyle(
+                color = TextColor,
+                fontFamily = FontFamily(Font(R.font.roboto_regular)),
+                fontSize = 16.sp
+            )
+        )
+        Image(
+            modifier = Modifier
+                .size(450.dp)
+                .fillMaxWidth()
+                .align(Alignment.CenterHorizontally),
+            painter = painterResource(R.drawable.poketgo),
+            contentDescription = ""
+        )
+        //////////////////////////////////////////////////
+    }
+    Button(
+        shape = RectangleShape,
+        colors = ButtonColors(
+            contentColor = Color.Transparent,
+            containerColor = Color(214,225,225),
+            disabledContentColor = Color.Transparent,
+            disabledContainerColor = Color(214,225,225)
+        ),
+        modifier = Modifier
+            .offset(
+                x = 100.dp,
+                y = -15.dp
+            )
+            .height(50.dp)
+            .width(150.dp)
+            .clip(RoundedCornerShape(8.dp))
+        ,
+        onClick = {
+            visible.value = !visible.value
+        }
+    ) {
+        Image(
+            modifier = Modifier
+                .size(30.dp)
+                .offset(
+                    y = 5.dp
+                ),
+            painter = painterResource(R.drawable.cli_down),
+            contentDescription = ""
+        )
+    }
 }
