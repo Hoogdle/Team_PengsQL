@@ -38,3 +38,25 @@ fun ArrowAndMenu(){
         )
     }
 }
+
+@Composable
+fun OnlyMenu(){
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                top = 10.dp,
+                start = 40.dp,
+                end = 40.dp,
+                bottom = 5.dp
+            ),
+        horizontalArrangement = Arrangement.End
+    ) {
+
+        Icon(
+            painter = painterResource(R.drawable.menu),
+            tint = Color.Black,
+            contentDescription = "",
+        )
+    }
+}
