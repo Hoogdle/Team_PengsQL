@@ -4,6 +4,7 @@ import android.util.Log
 import android.widget.Space
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -88,6 +89,35 @@ fun CLI(){
             )
         }
         CLITemplate(inputs)
+    }
+    Button(
+        shape = RectangleShape,
+        colors = ButtonColors(
+            contentColor = Color.Transparent,
+            containerColor = Color(214,225,225),
+            disabledContentColor = Color.Transparent,
+            disabledContainerColor = Color(214,225,225)
+        ),
+        modifier = Modifier
+            .offset(
+                x = 100.dp,
+                y = 350.dp
+            )
+            .height(50.dp)
+            .width(150.dp)
+            .clip(RoundedCornerShape(8.dp))
+            ,
+        onClick = {}
+    ) {
+        Image(
+            modifier = Modifier
+                .size(30.dp)
+                .offset(
+                    y = -5.dp
+                ),
+            painter = painterResource(R.drawable.cli_up),
+            contentDescription = ""
+        )
     }
 }
 
