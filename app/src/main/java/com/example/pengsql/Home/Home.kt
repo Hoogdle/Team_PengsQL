@@ -72,7 +72,7 @@ fun Home(){
             painter = painterResource(R.drawable.home_title),
             contentDescription = ""
         )
-        Row{
+        Row(){
             HomeDBList(sampleDB)
             Spacer(Modifier.width(140.dp))
             Column(
