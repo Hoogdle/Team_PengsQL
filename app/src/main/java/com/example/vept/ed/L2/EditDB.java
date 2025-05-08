@@ -6,34 +6,16 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
-import android.view.Gravity;
-import android.widget.TableRow;
-import android.widget.TextView;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-import com.example.vept.R;
 import com.example.vept.sysops.L1.SysOpsDB;
-
-import java.io.File;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 
 public class EditDB extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
-    private static final String DATABASE_FOLDER = "database/";
     private SQLiteDatabase db;
-    private List<List<String>> DataList;
-    private List<String> HeaderList;
-    private int PageSize;
-    private int Page;
     private final Context mContext;
     private String dbPath;
     private String databaseName;
@@ -230,99 +212,6 @@ public class EditDB extends SQLiteOpenHelper {
         return triggerNames;
     }
 
-    public List<String> getTableNames() { // 레거시 코드 종속성 문제 해결될때까지 유지중
-        List<String> tableNames = new ArrayList<>();
-        Cursor cursor = db.rawQuery("SELECT name FROM sqlite_master WHERE type='table';", null);
-        if (cursor.moveToFirst()) {
-            do {
-                tableNames.add(cursor.getString(0));
-            } while (cursor.moveToNext());
-        }
-        cursor.close();
-        return tableNames;
-    }
-
-    public List<List<String>> getTableDataByPage(String TableName, int PageNum) {
-        DataList = new ArrayList<>();
-        getTableHeader(TableName);
-        getTableCellByPage(TableName, PageNum - 1);
-        return DataList;
-    }
-
-    public int getPageCount(String TableName) {
-        String Query = "SELECT count(*) FROM " + TableName + ";";
-        Cursor cursor = db.rawQuery(Query, null);
-        int elements = 0;
-        int count = 0;
-
-        if (cursor.moveToFirst()) {
-            do {
-                elements = Integer.parseInt(cursor.getString(0));
-            } while (cursor.moveToNext());
-        }
-
-        count = (int)((elements - 1) / PageSize);
-
-        return count;
-    }
-
-    public void setPageSize(int ps) {
-        PageSize = ps;
-    }
-
-    public int getPageSize() {
-        return PageSize;
-    }
-
-    private void getTableCell(String TableName, int start, int length) {
-        String Query = "SELECT * FROM " + TableName + " LIMIT " + length +  " OFFSET " + start + ";";
-        Cursor cursor = db.rawQuery(Query, null);
-
-        if (cursor.moveToFirst()) {
-            do {
-                int colnum = cursor.getColumnCount();
-                List<String> DataRow = new ArrayList<>();
-
-                for(int i = 0;i < colnum;i++) {
-                    DataRow.add(cursor.getString(i));
-                }
-
-                DataList.add(DataRow);
-            } while (cursor.moveToNext());
-        }
-    }
-
-    private void getTableCellByPage(String TableName, int PageNum) {
-        String Query = "SELECT * FROM " + TableName + " LIMIT " + PageSize +  " OFFSET " + PageNum * PageSize + ";";
-        Cursor cursor = db.rawQuery(Query, null);
-
-        if (cursor.moveToFirst()) {
-            do {
-                int colnum = cursor.getColumnCount();
-                List<String> DataRow = new ArrayList<>();
-
-                for(int i = 0;i < colnum;i++) {
-                    DataRow.add(cursor.getString(i));
-                }
-
-                DataList.add(DataRow);
-            } while (cursor.moveToNext());
-        }
-    }
-
-    private void getTableHeader(String TableName) {
-        Cursor cursor = db.rawQuery("SELECT name FROM pragma_table_info('" + TableName + "');", null);
-
-        List<String> tmpList = new ArrayList<>();
-
-        if (cursor.moveToFirst()) {
-            do {
-                tmpList.add(cursor.getString(0));
-            } while (cursor.moveToNext());
-            DataList.add(tmpList);
-        }
-    }
-
 
     public void deleteTable(String tableName) {
         try {
@@ -360,7 +249,6 @@ public class EditDB extends SQLiteOpenHelper {
         }
     }
 
-
     public List<List<String>> getTablePageDataRaw(String tableName, int page, int pageSize) {
         List<List<String>> result = new ArrayList<>();
         int offset = (page - 1) * pageSize;
@@ -386,6 +274,68 @@ public class EditDB extends SQLiteOpenHelper {
         return result;
     }
 
+    // EditDB.java
+//    public List<List<String>> getTablePageData(String tableName, int page, int itemsPerPage) {
+//        List<List<String>> result = new ArrayList<>();
+//        try (Cursor cursor = db.rawQuery("SELECT * FROM `" + tableName + "` LIMIT ? OFFSET ?", new String[]{
+//                String.valueOf(itemsPerPage),
+//                String.valueOf(page * itemsPerPage)
+//        })) {
+//            int columnCount = cursor.getColumnCount();
+//            while (cursor.moveToNext()) {
+//                List<String> row = new ArrayList<>();
+//                for (int i = 0; i < columnCount; i++) {
+//                    row.add(cursor.getString(i));
+//                }
+//                result.add(row);
+//            }
+//        } catch (Exception e) {
+//            Log.e("EditDB", "페이지 데이터 가져오기 실패", e);
+//        }
+//        return result;
+//    }
+
+    public List<List<String>> getTablePageData(String tableName, int page, int itemsPerPage) {
+        List<List<String>> result = new ArrayList<>();
+        try (Cursor cursor = db.rawQuery(
+                "SELECT * FROM `" + tableName + "` LIMIT ? OFFSET ?",
+                new String[]{String.valueOf(itemsPerPage), String.valueOf(page * itemsPerPage)}
+        )) {
+            int columnCount = cursor.getColumnCount();
+            while (cursor.moveToNext()) {
+                List<String> row = new ArrayList<>();
+                for (int i = 0; i < columnCount; i++) {
+                    switch (cursor.getType(i)) {
+                        case Cursor.FIELD_TYPE_NULL:
+                            row.add("NULL");
+                            break;
+                        case Cursor.FIELD_TYPE_INTEGER:
+                            row.add(String.valueOf(cursor.getLong(i)));
+                            break;
+                        case Cursor.FIELD_TYPE_FLOAT:
+                            row.add(String.valueOf(cursor.getDouble(i)));
+                            break;
+                        case Cursor.FIELD_TYPE_STRING:
+                            row.add(cursor.getString(i));
+                            break;
+                        case Cursor.FIELD_TYPE_BLOB:
+                            byte[] blob = cursor.getBlob(i);
+                            row.add("[BLOB: " + (blob != null ? blob.length : 0) + " bytes]");
+                            break;
+                        default:
+                            row.add("[UNKNOWN TYPE]");
+                            break;
+                    }
+                }
+                result.add(row);
+            }
+        } catch (Exception e) {
+            Log.e("EditDB", "페이지 데이터 가져오기 실패", e);
+        }
+        return result;
+    }
+
+
     public int getRowCount(String tableName) {
         int count = 0;
         try {
@@ -400,13 +350,53 @@ public class EditDB extends SQLiteOpenHelper {
         return count;
     }
 
+    public void updateRowBySnapshot(String tableName, List<String> fields, List<String> oldRow, String columnToUpdate, String newValue) {
+        if (fields.size() != oldRow.size()) {
+            Log.e("EditDB", "필드 수와 데이터 수 불일치");
+            return;
+        }
+
+        try {
+            // SET 구문
+            StringBuilder setClause = new StringBuilder();
+            setClause.append(columnToUpdate).append(" = ?");
+
+            // WHERE 구문 (스냅샷과 동일한 행을 찾기 위해 전체 필드를 조건으로 사용)
+            StringBuilder whereClause = new StringBuilder();
+            List<String> whereArgs = new ArrayList<>();
+            for (int i = 0; i < fields.size(); i++) {
+                if (i > 0) whereClause.append(" AND ");
+                whereClause.append(fields.get(i)).append(" = ?");
+                whereArgs.add(oldRow.get(i));
+            }
+
+            // 최종 쿼리 실행
+            String sql = "UPDATE " + tableName + " SET " + setClause + " WHERE " + whereClause;
+            List<String> allArgs = new ArrayList<>();
+            allArgs.add(newValue); // SET 절
+            allArgs.addAll(whereArgs); // WHERE 절
+            db.execSQL(sql, allArgs.toArray());
+
+            Log.d("EditDB", "수정 시도: 테이블=" + tableName + " 필드=" + columnToUpdate + " 새값=" + newValue);
+
+            Log.d("EditDB", "WHERE 조건: ");
+            for (int i = 0; i < fields.size(); i++) {
+                Log.d("EditDB", fields.get(i) + " = " + oldRow.get(i));
+            }
+
+            Log.d("EditDB", "최종 SQL = " + sql);
+            Log.d("EditDB", "ARGS = " + allArgs.toString());
+
+        } catch (Exception e) {
+            Log.e("EditDB", "updateRowBySnapshot 실패", e);
+        }
+    }
 
 
     @Override
     public void onCreate(SQLiteDatabase db) {
 
     }
-
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {

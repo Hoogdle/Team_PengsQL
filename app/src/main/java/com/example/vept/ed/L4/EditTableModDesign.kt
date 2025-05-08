@@ -65,9 +65,6 @@ import com.example.vept.ui.theme.TitleColor
 
 
 
-import com.example.vept.ed.L4L.dropDownSample
-import com.example.vept.ed.L4L.tableDataSamples
-
 // =========================================================READ ME=========================================================
 // 구현 난이도가 꽤 있어서 주석을 충분히 달지는 못했습니다.
 // *** 중요 ***

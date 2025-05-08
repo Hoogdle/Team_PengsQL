@@ -1,28 +1,22 @@
 package com.example.vept.ed.L4
 
-import android.util.Log
-import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -30,39 +24,33 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.vept.ui.other.ArrowAndMenu
 import com.example.vept.R
 import com.example.vept.ui.theme.BackGroundColor
-import com.example.vept.ui.theme.ButtonColor
-import com.example.vept.ui.theme.ButtonTextColor
 import com.example.vept.ui.theme.TableBackGroundColor
 import com.example.vept.ui.theme.TextColor
 import com.example.vept.ui.theme.TitleColor
 
-
+/*
 @Composable
 fun EditerMainDesign(
     viewModel: EditerMainViewModel,
     navController: NavHostController
 ){
-
-
     Column (
         Modifier
             .background(BackGroundColor)
@@ -78,16 +66,42 @@ fun EditerMainDesign(
             horizontalArrangement = Arrangement.SpaceBetween
         ){
             SelectDBTitle(viewModel.databaseName)
-
             //<<===디버그용===!!//
             DebugDropdown(navController = navController)
             //!!===디버그용===>>//
+            SelectDBButtonPack()
+        }
+        SelectDBTemplate(viewModel, navController)
+    }
+}*/
 
+@Composable
+fun EditerMainDesign(
+    viewModel: EditerMainViewModel,
+    navController: NavHostController
+) {
+    val databaseName = viewModel.databaseName
+    Column(
+        Modifier
+            .background(BackGroundColor)
+            .padding(top = 25.dp)
+    ) {
+        ArrowAndMenu()
+        Spacer(modifier = Modifier.height(15.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            SelectDBTitle(databaseName)
+            DebugDropdown(navController = navController)
             SelectDBButtonPack()
         }
         SelectDBTemplate(viewModel, navController)
     }
 }
+
+
+
 @Composable
 fun SelectDBTitle(
     text: String
@@ -106,16 +120,7 @@ fun SelectDBTitle(
     }
 }
 
-@Composable
-fun ToggleHeaderButton(isOpened: MutableState<Boolean>) {
-    Icon(
-        modifier = Modifier
-            .clickable { isOpened.value = !isOpened.value },
-        painter = painterResource(if (isOpened.value) R.drawable.small_down else R.drawable.right_arrow),
-        contentDescription = "",
-        tint = TextColor
-    )
-}
+
 
 @Composable
 fun TextHeader(headName: String, size: Int) {
@@ -128,7 +133,7 @@ fun TextHeader(headName: String, size: Int) {
         )
     )
 }
-
+/*
 @Composable
 fun SelectDBTemplate(
     viewModel: EditerMainViewModel,
@@ -231,7 +236,7 @@ fun SelectTableItem(
     itemName: String,
     relatedList: List<String>,
     itemType: String, // 자료형에 따른 동작 처리
-    tableIsOpened: MutableState<Boolean>,// 부모에서 전달받은 상태
+    tableIsOpened: MutableState<Boolean>, // 부모에서 전달받은 상태
     onView: (String, String) -> Unit,
     onEdit: (String, String) -> Unit,
     onDelete: (String, String) -> Unit
@@ -240,13 +245,27 @@ fun SelectTableItem(
     val isOpened = remember { mutableStateOf(false) }
     val selectedAction = remember { mutableStateOf(-1) }
 
-    // 각 자료형에 따라 드롭다운 메뉴에서 제공할 옵션 다르게 설정
-    val dropdownItems = when (itemType) {
-        "테이블" -> listOf("보기", "수정", "삭제")
-        "뷰" -> listOf("보기", "삭제")
-        "인덱스" -> listOf("수정", "삭제")
-        "트리거" -> listOf("수정", "삭제")
-        else -> listOf()
+    // 자료형에 따라 드롭다운 메뉴 항목 설정
+    val dropdownItems = remember(itemType) {
+        when (itemType) {
+            "테이블" -> listOf("보기", "수정", "삭제")
+            "뷰" -> listOf("보기", "삭제")
+            "인덱스" -> listOf("수정", "삭제")
+            "트리거" -> listOf("수정", "삭제")
+            else -> listOf()
+        }
+    }
+
+    // 동적 데이터를 한 번만 로드하고 저장하도록 처리
+    val isDataLoaded = remember { mutableStateOf(false) }
+
+    // 데이터 로딩 (비동기 호출 예시)
+    LaunchedEffect(key1 = itemName) {
+        if (!isDataLoaded.value) {
+            // 비동기 데이터 로드
+            // 예: viewModel.loadDataForItem(itemName)
+            isDataLoaded.value = true
+        }
     }
 
     // UI 구성
@@ -325,8 +344,6 @@ fun SelectTableItem(
                         isDropDownExpanded.value = false
                     }
                 ) {
-                    // 드롭다운 항목 표시
-                    Log.d("DBAction", "작동111")
                     dropdownItems.forEach { action ->
                         DropdownMenuItem(
                             text = { Text(action, style = dropdownTextStyle()) },
@@ -334,9 +351,6 @@ fun SelectTableItem(
                                 selectedAction.value = dropdownItems.indexOf(action)
                                 isDropDownExpanded.value = false
 
-                                Log.d("DBAction", "작동222")
-
-                                // 동작에 따른 처리를 추가
                                 when (action) {
                                     "보기" -> onView(itemName, itemType)
                                     "수정" -> onEdit(itemName, itemType)
@@ -350,10 +364,9 @@ fun SelectTableItem(
         }
     }
 }
-
+*/
 
 // 스타일 재사용 함수
-@Composable
 fun dropdownTextStyle(): TextStyle {
     return TextStyle(
         color = TextColor,
@@ -362,8 +375,187 @@ fun dropdownTextStyle(): TextStyle {
     )
 }
 
+@Composable
+fun SelectDBTemplate(
+    viewModel: EditerMainViewModel,
+    navController: NavHostController
+) {
+    val indexInfoState by viewModel.indexInfo.observeAsState(emptyMap())
+    val tableMap by viewModel.tableFieldMap.observeAsState(emptyMap())
+    val viewMap by viewModel.viewInfo.observeAsState(emptyMap())
+    val triggers by viewModel.triggerList.observeAsState(emptyList())
+    val triggerMap = triggers.associateWith { emptyList<String>() }
+
+    val sectionExpandedMap = remember { mutableStateMapOf<String, Boolean>() }
+
+    val verticalScrollState = rememberScrollState()
+
+    Row(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(TableBackGroundColor)
+            .verticalScroll(verticalScrollState)
+            .padding(horizontal = 30.dp)
+    ) {
+        Column {
+            listOf("테이블", "인덱스", "뷰", "트리거").forEach { section ->
+                val items = when (section) {
+                    "테이블" -> tableMap
+                    "인덱스" -> indexInfoState
+                    "뷰" -> viewMap
+                    "트리거" -> triggerMap
+                    else -> emptyMap()
+                }
+                SectionWithHeaderAndItems(
+                    headerName = section,
+                    items = items,
+                    expandedMap = sectionExpandedMap,
+                    viewModel = viewModel,
+                    navController = navController
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun SectionWithHeaderAndItems(
+    headerName: String,
+    items: Map<String, List<String>>,
+    expandedMap: MutableMap<String, Boolean>,
+    viewModel: EditerMainViewModel,
+    navController: NavHostController
+) {
+    val isSectionExpanded = expandedMap.getOrPut(headerName) { false }
+
+    // 항목이 0개일 경우 확장 아이콘은 숨기고, 항목 이름은 그대로 표시
+    val shouldExpand = items.isNotEmpty()
+
+    Column {
+        // 항목이 있을 때만 확장 가능하도록 처리
+        Row(
+            Modifier
+                .clickable { expandedMap[headerName] = !isSectionExpanded }
+                .padding(vertical = 8.dp)
+        ) {
+            // 확장 아이콘: 항목이 있을 때만 표시
+            if (shouldExpand) {
+                Icon(
+                    painter = painterResource(
+                        if (isSectionExpanded) R.drawable.small_down else R.drawable.right_arrow
+                    ),
+                    contentDescription = "",
+                    tint = TextColor
+                )
+            }
+
+            // 항목 이름: 항상 표시
+            TextHeader(headName = headerName, size = items.size)
+        }
+
+        // 확장된 항목을 표시
+        if (isSectionExpanded) {
+            items.forEach { (itemName, relatedList) ->
+                val itemKey = "$headerName::$itemName"
+                val isItemExpanded = expandedMap.getOrPut(itemKey) { false }
+
+                SelectTableItem(
+                    itemName = itemName,
+                    relatedList = relatedList,
+                    itemType = headerName,
+                    isExpanded = isItemExpanded,
+                    onExpandToggle = { expandedMap[itemKey] = !isItemExpanded },
+                    onView = { viewModel.viewItem(it, headerName, navController) },
+                    onEdit = { viewModel.editItem(it, headerName, navController) },
+                    onDelete = { viewModel.deleteItem(it, headerName) }
+                )
+            }
+        }
+
+        Spacer(Modifier.height(30.dp))
+        HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
+    }
+}
+
+@Composable
+fun SelectTableItem(
+    itemName: String,
+    relatedList: List<String>,
+    itemType: String,
+    isExpanded: Boolean,
+    onExpandToggle: () -> Unit,
+    onView: (String) -> Unit,
+    onEdit: (String) -> Unit,
+    onDelete: (String) -> Unit
+) {
+    val isDropDownExpanded = remember { mutableStateOf(false) }
+
+    val dropdownItems = when (itemType) {
+        "테이블" -> listOf("보기", "수정", "삭제")
+        "뷰" -> listOf("보기", "삭제")
+        else -> listOf("수정", "삭제")
+    }
+
+    Column {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Spacer(Modifier.width(40.dp))
+
+            // 확장 아이콘: 항목이 있을 때만 표시
+            if (relatedList.isNotEmpty()) {
+                Icon(
+                    modifier = Modifier.clickable { onExpandToggle() },
+                    painter = painterResource(
+                        if (isExpanded) R.drawable.small_down else R.drawable.right_arrow
+                    ),
+                    contentDescription = "",
+                    tint = TextColor
+                )
+
+                Spacer(Modifier.width(7.dp))
+            }
+
+            // 항목 이름과 관련 리스트 크기: 관련 리스트가 있을 때만 (0)을 표시
+            Text(
+                modifier = Modifier.clickable { isDropDownExpanded.value = true },
+                text = "$itemName ${if (relatedList.isNotEmpty()) "(${relatedList.size})" else ""}",
+                style = dropdownTextStyle()
+            )
+
+            DropdownMenu(
+                expanded = isDropDownExpanded.value,
+                onDismissRequest = { isDropDownExpanded.value = false }
+            ) {
+                dropdownItems.forEach { action ->
+                    DropdownMenuItem(
+                        text = { Text(action, style = dropdownTextStyle()) },
+                        onClick = {
+                            isDropDownExpanded.value = false
+                            when (action) {
+                                "보기" -> onView(itemName)
+                                "수정" -> onEdit(itemName)
+                                "삭제" -> onDelete(itemName)
+                            }
+                        }
+                    )
+                }
+            }
+        }
+
+        // 확장된 항목을 표시
+        if (isExpanded) {
+            relatedList.forEach {
+                Row {
+                    Spacer(Modifier.width(70.dp))
+                    Text(text = it, style = dropdownTextStyle())
+                }
+            }
+        }
+    }
+}
 
 
+
+/*
 @Composable
 fun SelectDBButton(
     text: String,
@@ -408,7 +600,7 @@ fun SelectDBButton(
         )
     }
 }
-
+*/
 @Composable
 fun SelectDBButtonPack(){
     Row (
@@ -441,3 +633,4 @@ fun SelectDBButtonPack(){
         )*/
     }
 }
+
