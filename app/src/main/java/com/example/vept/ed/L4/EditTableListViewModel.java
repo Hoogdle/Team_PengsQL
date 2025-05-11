@@ -1,24 +1,15 @@
 package com.example.vept.ed.L4;
 
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
-
 import com.example.vept.ed.L2.EditDB;
-
 import java.util.List;
-import java.util.concurrent.Executors;
 
 
 public class EditTableListViewModel  extends ViewModel {
 
     private EditDB editDB;
-    private String databaseName;
     private String itemName;
     private String itemType;
-    private MutableLiveData<List<List<String>>> tablePageData = new MutableLiveData<>();
-    private MutableLiveData<Integer> rowCount = new MutableLiveData<>();
-
 
 
     public void setEditDB(EditDB db) {
@@ -38,30 +29,9 @@ public class EditTableListViewModel  extends ViewModel {
         return itemType;
     }
 
-    public LiveData<List<List<String>>> getTablePageData(String tablename, int page, int itemsPerPage) {
-        Executors.newSingleThreadExecutor().execute(() -> {
-            List<List<String>> data = editDB.getTablePageDataRaw(tablename, page-1, itemsPerPage);
-            tablePageData.postValue(data);
-        });
-        return tablePageData;
-    }
 
-    public List<List<String>> getTablePageDataNow(String tableName, int page, int itemsPerPage) {
-        return editDB.getTablePageData(tableName, page-1, itemsPerPage);
-    }
-
-    public LiveData<Integer> getRowCount(String itemName) {
-        Executors.newSingleThreadExecutor().execute(() -> {
-            int count = editDB.getRowCount(itemName);
-            rowCount.postValue(count);
-        });
-        return rowCount;
-    }
-
-    public LiveData<List<String>> getFieldNames(String itemName) {
-        MutableLiveData<List<String>> result = new MutableLiveData<>();
-        result.setValue(editDB.getFieldNamesForTable(itemName));
-        return result;
+    public List<String> getFieldNamesNow(String tableName) {
+        return editDB.getFieldNamesForTable(tableName);
     }
 
     public void updateRowBySnapshot( List<String> row, List<String> fields, String column, String newValue) {
@@ -69,4 +39,13 @@ public class EditTableListViewModel  extends ViewModel {
             editDB.updateRowBySnapshot(itemName, fields, row, column, newValue);
         }
     }
+
+    // 필터링된 데이터의 특정 페이지를 가져오는 메서드
+    public List<List<String>> getFilteredTablePageDataNow(String tableName, int page, int itemsPerPage, List<String> filters) {
+        return editDB.getFilteredTablePageData(tableName, page - 1, itemsPerPage, filters); // page - 1로 0부터 시작하게 처리
+    }
+    
+
+
+
 }

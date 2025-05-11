@@ -316,12 +316,14 @@ public class EditDB extends SQLiteOpenHelper {
                             row.add(String.valueOf(cursor.getDouble(i)));
                             break;
                         case Cursor.FIELD_TYPE_STRING:
-                            row.add(cursor.getString(i));
+                            String str = cursor.getString(i);
+                            row.add(str != null ? str : "NULL");
                             break;
                         case Cursor.FIELD_TYPE_BLOB:
                             byte[] blob = cursor.getBlob(i);
                             row.add("[BLOB: " + (blob != null ? blob.length : 0) + " bytes]");
                             break;
+
                         default:
                             row.add("[UNKNOWN TYPE]");
                             break;
@@ -402,4 +404,56 @@ public class EditDB extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // Handle database upgrades
     }
+
+    public List<List<String>> getFilteredTablePageData(String tableName, int page, int itemsPerPage, List<String> filters) {
+        List<List<String>> result = new ArrayList<>();
+
+        try {
+            // 필드 이름 미리 가져오기
+            List<String> fieldNames = getFieldNamesForTable(tableName);
+            if (fieldNames == null || fieldNames.size() != filters.size()) {
+                Log.e("EditDB", "필드 개수와 필터 개수가 일치하지 않음");
+                return result;
+            }
+
+            // WHERE 절 생성
+            StringBuilder whereClause = new StringBuilder();
+            List<String> argsList = new ArrayList<>();
+
+            for (int i = 0; i < filters.size(); i++) {
+                String filter = filters.get(i);
+                if (filter != null && !filter.isEmpty()) {
+                    if (whereClause.length() > 0) whereClause.append(" AND ");
+                    whereClause.append("`").append(fieldNames.get(i)).append("` LIKE ?");
+                    argsList.add("%" + filter + "%"); // 부분 일치
+                }
+            }
+
+            String where = whereClause.length() > 0 ? "WHERE " + whereClause.toString() : "";
+
+            // 최종 쿼리
+            String query = "SELECT * FROM `" + tableName + "` " + where + " LIMIT ? OFFSET ?";
+            argsList.add(String.valueOf(itemsPerPage));
+            argsList.add(String.valueOf(page * itemsPerPage));
+
+            try (Cursor cursor = db.rawQuery(query, argsList.toArray(new String[0]))) {
+                int columnCount = cursor.getColumnCount();
+                while (cursor.moveToNext()) {
+                    List<String> row = new ArrayList<>();
+                    for (int i = 0; i < columnCount; i++) {
+                        row.add(cursor.getString(i));
+                    }
+                    result.add(row);
+                }
+            }
+
+        } catch (Exception e) {
+            Log.e("EditDB", "getFilteredTablePageData 실패", e);
+        }
+
+        return result;
+    }
+
+
+
 }

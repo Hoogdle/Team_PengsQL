@@ -52,10 +52,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
+
+
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -64,7 +62,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -82,12 +79,25 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.material3.AlertDialog
+
 import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.times
 import kotlin.math.ceil
-import kotlin.random.Random
 
-private const val itemsPerPage = 50
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.unit.sp
+
+
+
 
 
 @Composable
@@ -99,6 +109,9 @@ fun EditTableListDesign(
     val ChartType = viewModel.getItemType() ?: "타입 없음"
     val isEditable = viewModel.getItemType() == "테이블"   // 0은 뷰
     val currentPage = remember { mutableStateOf("1") }
+    val isInputChanged = remember { mutableStateOf(false) }
+    val itemsPerPage = 50
+
 
     Column (
         Modifier
@@ -119,7 +132,9 @@ fun EditTableListDesign(
             viewModel = viewModel,
             TableName = TableName,
             currentPage = currentPage,
-            isEditable = isEditable
+            isEditable = isEditable,
+            itemsPerPage = itemsPerPage,
+            isInputChanged = isInputChanged
         )
     }
 }
@@ -130,46 +145,63 @@ fun DBTable(
     viewModel: EditTableListViewModel,
     TableName: String,
     currentPage: MutableState<String>,
-    isEditable: Boolean
+    isInputChanged: MutableState<Boolean>,
+    isEditable: Boolean,
+    itemsPerPage: Int
 ) {
     val verticalScrollState = rememberScrollState()
     val horizontalScrollState = rememberScrollState()
 
+    val fieldNames = remember {
+        viewModel.getFieldNamesNow(TableName)
+    }
 
+    val filters = remember { mutableStateOf(List(fieldNames.size) { "" }) }
 
-    // 임시 데이터: 50행 x 10열
-    val rowCount = 50
-    val columnCount = 15
-
-    val tableData = remember(currentPage.value) {
+    // 테이블 데이터 갱신
+    val tableData = remember(currentPage.value, filters.value) {
         mutableStateOf(
-            viewModel.getTablePageDataNow(TableName, currentPage.value.toInt(), itemsPerPage)
+            viewModel.getFilteredTablePageDataNow(
+                TableName,
+                currentPage.value.toInt(),
+                itemsPerPage,
+                filters.value
+            )
         )
     }
 
-    val fieldNames = List(columnCount) { "열${it + 1}" }
-    val data = List(rowCount) { row ->
-        List(columnCount) { col ->
-            if (Random.nextInt(100) < 5) { // 5% 확률로 긴 텍스트 생성
-                "긴텍스트_${"A".repeat(Random.nextInt(10, 30))}"
-            } else {
-                "R${row + 1}C${col + 1}"
-            }
+    // Column 너비 계산
+    val columnWidths = remember(tableData.value) {
+        val defaultWidth = 100.dp
+        tableData.value.firstOrNull()?.indices?.map { col ->
+            val maxChar = tableData.value.maxOfOrNull { it.getOrNull(col)?.length ?: 0 } ?: 0
+            if (maxChar > 5) defaultWidth + (maxChar - 5) * 5.dp else defaultWidth
+        } ?: List(fieldNames.size) { defaultWidth }
+    }
+
+    // Row 높이 계산
+    val rowHeights = remember(tableData.value) {
+        val defaultHeight = 40.dp
+        tableData.value.map { row ->
+            // 한 줄로 출력되므로 maxLine을 1로 설정
+            defaultHeight
         }
     }
 
-    // 박스별 크기 계산
-    val defaultWidth = 100.dp
-    val defaultHeight = 40.dp
 
-    val columnWidths = (0 until columnCount).map { col ->
-        val maxChar = data.maxOf { it[col].length }
-        if (maxChar > 5) defaultWidth + (maxChar - 5) * 5.dp else defaultWidth
-    }
-
-    val rowHeights = (0 until rowCount).map { row ->
-        val maxLine = data[row].maxOf { ceil(it.length / 30.0).toInt() }
-        if (maxLine > 1) defaultHeight + (maxLine - 1) * 20.dp else defaultHeight
+    // isInputChanged가 true일 때 데이터 갱신
+    LaunchedEffect(isInputChanged.value) {
+        if (isInputChanged.value) {
+            // 데이터 갱신
+            tableData.value = viewModel.getFilteredTablePageDataNow(
+                TableName,
+                currentPage.value.toInt(),
+                itemsPerPage,
+                filters.value
+            )
+            // 갱신 후 isInputChanged를 false로 초기화
+            isInputChanged.value = false
+        }
     }
 
     Column(
@@ -183,22 +215,40 @@ fun DBTable(
             .verticalScroll(verticalScrollState)
     ) {
         Spacer(modifier = Modifier.height(2.dp))
-        BarTop(fieldNames, columnWidths)
+        BarTop(fieldNames, columnWidths, filters)
         Row {
-            BarLeftIndex(rowCount, rowHeights)
+            BarLeftIndex(
+                tableData.value.size,
+                rowHeights,
+                currentPage,
+                itemsPerPage
+            )
             BoxTable(
                 data = tableData.value,
-                columnWidths = columnWidths, // 미리 계산된 값 사용
-                rowHeights = rowHeights
+                columnWidths = columnWidths,
+                rowHeights = rowHeights,
+                fieldNames = fieldNames,
+                viewModel = viewModel,
+                currentPage = currentPage,
+                triggerPageUpdate = isInputChanged,
+                isEditable = isEditable
             )
         }
         Spacer(Modifier.height(16.dp))
-        PageControler(currentPage = currentPage)
+        PageController(
+            currentPage = currentPage,
+            isInputChanged = isInputChanged
+        )
     }
 }
 
+
 @Composable
-fun BarTop(fieldNames: List<String>, columnWidths: List<Dp>) {
+fun BarTop(
+    fieldNames: List<String>,
+    columnWidths: List<Dp>,
+    filters: MutableState<List<String>>
+) {
     Column {
         Row {
             Spacer(Modifier.width(60.dp))
@@ -206,7 +256,7 @@ fun BarTop(fieldNames: List<String>, columnWidths: List<Dp>) {
                 Box(
                     modifier = Modifier
                         .width(columnWidths[index])
-                        .height(40.dp) // TextField와 높이 맞춤
+                        .height(40.dp)
                         .border(1.dp, Color.Gray)
                         .padding(8.dp),
                     contentAlignment = Alignment.CenterStart
@@ -224,8 +274,12 @@ fun BarTop(fieldNames: List<String>, columnWidths: List<Dp>) {
             Spacer(Modifier.width(60.dp))
             fieldNames.forEachIndexed { index, _ ->
                 TextField(
-                    value = "",
-                    onValueChange = {},
+                    value = filters.value[index],
+                    onValueChange = { newValue ->
+                        filters.value = filters.value.toMutableList().also {
+                            it[index] = newValue
+                        }
+                    },
                     modifier = Modifier
                         .width(columnWidths[index])
                         .height(40.dp)
@@ -238,12 +292,19 @@ fun BarTop(fieldNames: List<String>, columnWidths: List<Dp>) {
 }
 
 @Composable
-fun BarLeftIndex(rowCount: Int, rowHeights: List<Dp>) {
+fun BarLeftIndex(
+    rowCount: Int,
+    rowHeights: List<Dp>,
+    currentPage: MutableState<String>,
+    itemsPerPage: Int
+) {
     Column {
-
         repeat(rowCount) { index ->
-            val numStr = "${index + 1}"
+            // 실제 인덱스를 페이지에 맞춰 계산
+            val pageIndex = index + 1 + (currentPage.value.toInt() - 1) * itemsPerPage
+            val numStr = "$pageIndex"
             val width = max(60.dp, (numStr.length * 12).dp)
+
             Box(
                 modifier = Modifier
                     .width(width)
@@ -261,24 +322,40 @@ fun BarLeftIndex(rowCount: Int, rowHeights: List<Dp>) {
 fun BoxTable(
     data: List<List<String>>,
     columnWidths: List<Dp>,
-    rowHeights: List<Dp>
+    rowHeights: List<Dp>,
+    fieldNames: List<String>,
+    viewModel: EditTableListViewModel,
+    currentPage: MutableState<String>,
+    triggerPageUpdate: MutableState<Boolean>,
+    isEditable: Boolean
 ) {
     Column {
         data.forEachIndexed { rowIndex, row ->
             Row {
-                row.forEachIndexed { colIndex, cell ->
-                    Box(
-                        modifier = Modifier
-                            .width(columnWidths[colIndex])
-                            .height(rowHeights[rowIndex])
-                            .border(1.dp, Color.Gray),
-                        contentAlignment = Alignment.CenterStart
-                    ) {
-                        Text(
-                            text = cell,
-                            modifier = Modifier.padding(start = 8.dp),
-                            maxLines = 3,
-                            overflow = TextOverflow.Ellipsis
+                row.forEachIndexed { colIndex, cellText ->
+                    val width = columnWidths.getOrNull(colIndex) ?: 100.dp
+                    val height = rowHeights.getOrNull(rowIndex) ?: 50.dp
+                    val modifier = Modifier
+                        .width(width)
+                        .height(height)
+                        .border(1.dp, Color.Gray)
+
+                    if (isEditable) {
+                        EditableTableCell(
+                            text = cellText ?: "NULL",
+                            rowIndex = rowIndex,
+                            colIndex = colIndex,
+                            fieldNames = fieldNames,
+                            rowData = row,
+                            viewModel = viewModel,
+                            currentPage = currentPage,
+                            triggerPageUpdate = triggerPageUpdate,
+                            modifier = modifier
+                        )
+                    } else {
+                        ReadOnlyCell(
+                            text = cellText,
+                            modifier = modifier
                         )
                     }
                 }
@@ -287,7 +364,104 @@ fun BoxTable(
     }
 }
 
+@Composable
+fun EditableTableCell(
+    text: String?,
+    rowIndex: Int,
+    colIndex: Int,
+    fieldNames: List<String>,
+    rowData: List<String>,
+    viewModel: EditTableListViewModel,
+    currentPage: MutableState<String>,
+    triggerPageUpdate: MutableState<Boolean>,
+    modifier: Modifier = Modifier
+) {
+    val editing = remember { mutableStateOf(false) }
+    var tempValue by remember { mutableStateOf(text ?: "NULL") }  // 초기값에 null-safe
 
+    if (editing.value) {
+        AlertDialog(
+            onDismissRequest = { editing.value = false },
+            title = { Text("셀 수정") },
+            text = {
+                Column {
+                    Text("변경할 값을 입력하세요:")
+                    Spacer(Modifier.height(8.dp))
+                    TextField(
+                        value = tempValue,
+                        onValueChange = { tempValue = it },
+                        singleLine = true
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    editing.value = false
+                    if (tempValue != (text ?: "NULL")) {
+                        val field = fieldNames.getOrNull(colIndex) ?: return@TextButton
+                        viewModel.updateRowBySnapshot(
+                            rowData,
+                            fieldNames,
+                            field,
+                            tempValue
+                        )
+                        triggerPageUpdate.value = true
+                    }
+                }) {
+                    Text("수정하기")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { editing.value = false }) {
+                    Text("취소")
+                }
+            }
+        )
+    }
+
+    Box(
+        modifier = modifier
+            .pointerInput(Unit) {
+                detectTapGestures(onDoubleTap = {
+                    editing.value = true
+                })
+            },
+        contentAlignment = Alignment.CenterStart
+    ) {
+        Text(
+            text = text ?: "NULL",  // null-safe 렌더링
+            modifier = Modifier.padding(start = 8.dp),
+            fontSize = 14.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+@Composable
+fun ReadOnlyCell(
+    text: String,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.CenterStart
+    ) {
+        Text(
+            text = text,
+            modifier = Modifier.padding(start = 8.dp),
+            fontSize = 14.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+
+// 일단 페이징은 더 작업 할 수 있으면 돌아오고
+// 최대 페이지의 문제 
+// 시스템을 동원할거임? -> 한다면 필터 고려하셈
+// 안할거면 일단 5페이지 업다운 만 존재하는거고
 @Composable
 fun PageControler(currentPage: MutableState<String>) {
     Row(
@@ -315,49 +489,55 @@ fun PageControler(currentPage: MutableState<String>) {
 }
 
 
-
-
-/*====페이징====*/
 @Composable
-fun DBTablePageControler(
+fun PageController(
     currentPage: MutableState<String>,
-    maximumPage: MutableState<String>,
     isInputChanged: MutableState<Boolean>
 ) {
     val input = remember { mutableStateOf(currentPage.value) }
-    // 페이지 조정 버튼 처리
-    Row(modifier = Modifier.padding(8.dp)) {
-        // 좌측 더블 버튼
-        DBTableArrowButton(ArrowDirection.FIRST, currentPage, maximumPage)
-        // 좌측 한 칸 버튼
-        DBTableArrowButton(ArrowDirection.LEFT, currentPage, maximumPage)
-        // 페이지 번호 입력 (직접 입력)
+
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
+        // -5 페이지로
+        DBTableArrowButton(ArrowDirection.LEFT_5, currentPage)
+        // -1 페이지로
+        DBTableArrowButton(ArrowDirection.LEFT, currentPage)
+
+        Spacer(Modifier.width(8.dp))
+
+        // 직접 입력
         BasicTextField(
             value = input.value,
             onValueChange = { input.value = it },
             modifier = Modifier
                 .width(50.dp)
                 .height(45.dp)
-                .background(Color.Gray)
-                .padding(8.dp),
-            textStyle = TextStyle(color = Color.Black)
+                .background(Color.LightGray, RoundedCornerShape(4.dp))
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            textStyle = TextStyle(color = Color.Black, fontSize = 16.sp),
+            singleLine = true
         )
-        // 페이지 표시
-        Text("of ${maximumPage.value}", modifier = Modifier.padding(8.dp))
-        // 우측 한 칸 버튼
-        DBTableArrowButton(ArrowDirection.RIGHT, currentPage, maximumPage)
-        // 우측 더블 버튼
-        DBTableArrowButton(ArrowDirection.LAST, currentPage, maximumPage)
+
+        Spacer(Modifier.width(4.dp))
+
+        // +1 페이지로
+        DBTableArrowButton(ArrowDirection.RIGHT, currentPage)
+        // +5 페이지로
+        DBTableArrowButton(ArrowDirection.RIGHT_5, currentPage)
     }
 
-
+    // 입력 동기화
     LaunchedEffect(currentPage.value) {
         input.value = currentPage.value
     }
 
-    // 페이지가 바뀌면 `currentPage`에 맞게 변경된 페이지를 업데이트
     LaunchedEffect(input.value) {
-        if (input.value.toIntOrNull() != null && input.value.toInt() in 1..maximumPage.value.toInt()) {
+        val pageInt = input.value.toIntOrNull()
+        if (pageInt != null && pageInt > 0) {
             currentPage.value = input.value
             isInputChanged.value = true
         }
@@ -367,29 +547,28 @@ fun DBTablePageControler(
 @Composable
 fun DBTableArrowButton(
     direction: ArrowDirection,
-    currentPage: MutableState<String>,
-    maximumPage: MutableState<String>
+    currentPage: MutableState<String>
 ) {
     val onClick: () -> Unit = when (direction) {
         ArrowDirection.LEFT -> {
             { if (currentPage.value.toInt() > 1) currentPage.value = (currentPage.value.toInt() - 1).toString() }
         }
         ArrowDirection.RIGHT -> {
-            { if (currentPage.value.toInt() < maximumPage.value.toInt()) currentPage.value = (currentPage.value.toInt() + 1).toString() }
+            { currentPage.value = (currentPage.value.toInt() + 1).toString() }
         }
-        ArrowDirection.FIRST -> {
-            { if (currentPage.value.toInt() > 1) currentPage.value = "1" }
+        ArrowDirection.LEFT_5 -> {
+            { if (currentPage.value.toInt() > 5) currentPage.value = (currentPage.value.toInt() - 5).toString() }
         }
-        ArrowDirection.LAST -> {
-            { if (currentPage.value.toInt() < maximumPage.value.toInt()) currentPage.value = maximumPage.value.toInt().toString() }
+        ArrowDirection.RIGHT_5 -> {
+            { currentPage.value = (currentPage.value.toInt() + 5).toString() }
         }
     }
 
     val icon = when (direction) {
         ArrowDirection.LEFT -> R.drawable.one_left
         ArrowDirection.RIGHT -> R.drawable.one_right
-        ArrowDirection.FIRST -> R.drawable.double_left
-        ArrowDirection.LAST -> R.drawable.double_right
+        ArrowDirection.LEFT_5 -> R.drawable.double_left
+        ArrowDirection.RIGHT_5 -> R.drawable.double_right
     }
 
     Icon(
@@ -401,6 +580,5 @@ fun DBTableArrowButton(
 }
 
 enum class ArrowDirection {
-    LEFT, RIGHT, FIRST, LAST
+    LEFT, RIGHT, LEFT_5, RIGHT_5
 }
-
