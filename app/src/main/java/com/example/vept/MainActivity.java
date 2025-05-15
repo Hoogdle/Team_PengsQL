@@ -14,7 +14,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        initializePermissions();        // 권한 체크
+        //initializePermissions();        // 권한 체크
 
         // ComposeView 생성
         ComposeView composeView = new ComposeView(this);
@@ -28,10 +28,10 @@ public class MainActivity extends AppCompatActivity {
         ComposableWrapper.setComposableContent(composeView, viewModel);
     }
 
-    private void initializePermissions() {
-        Permission permissionChecker = new Permission(this);
-        permissionChecker.checkStoragePermission();
-    }
+//    private void initializePermissions() {
+//        Permission permissionChecker = new Permission(this);
+//        permissionChecker.checkStoragePermission();
+//    }
 
 
 }
