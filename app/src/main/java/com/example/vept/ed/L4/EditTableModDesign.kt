@@ -51,6 +51,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.pengsql.Table.columnsTableData
+import com.example.pengsql.Table.sample1
 import com.example.vept.R
 
 import com.example.vept.ui.other.ArrowAndMenu
@@ -62,8 +64,6 @@ import com.example.vept.ui.theme.GreenBox
 import com.example.vept.ui.theme.TableBackGroundColor
 import com.example.vept.ui.theme.TextColor
 import com.example.vept.ui.theme.TitleColor
-
-
 
 // =========================================================READ ME=========================================================
 // 구현 난이도가 꽤 있어서 주석을 충분히 달지는 못했습니다.
@@ -89,6 +89,23 @@ import com.example.vept.ui.theme.TitleColor
 * */
 
 
+val tableDataSamples = listOf(
+    columnsTableData,
+    sample1, sample1, sample1,
+    sample1,
+    sample1,
+    sample1,
+    sample1,
+    sample1, sample1, sample1,
+    sample1,
+    sample1,
+    sample1,
+    sample1
+)
+val dropDownSample = listOf("apple","banana","mango","orange","watermelon")
+
+
+
 
 @Composable
 fun EditTableModDesign(
@@ -98,12 +115,12 @@ fun EditTableModDesign(
     val itemName = viewModel.getItemName() ?: "이름 없음"
     val itemType = viewModel.getItemType() ?: "타입 없음"
 
-    Column {
-        ReturnToMainButton(navController)
-        Text(text = "EditTableModDesign에서 수정할 항목: $itemName ($itemType)")  // 조회 항목 출력
-    }
-}
-    /*
+//    Column {
+//        ReturnToMainButton(navController)
+//        Text(text = "EditTableModDesign에서 수정할 항목: $itemName ($itemType)")  // 조회 항목 출력
+//    }
+//}
+
     Column (
         Modifier
             .background(BackGroundColor)
@@ -118,14 +135,8 @@ fun EditTableModDesign(
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ){
-            TableTitle("Table Name")
-
-
-
-            //<<===디버그용===!!//
-            ReturnToMainButton(navController)
-            //!!===디버그용===>>//
-
+            TableTitle("($itemType)")
+            //ReturnToMainButton(navController)
             TableButtonPack()
         }
         TableTemplate(tableDataSamples)
@@ -133,7 +144,7 @@ fun EditTableModDesign(
 }
 
 
-@Composable
+@Composable         //
 fun TableTitle(
     text: String
 ){
@@ -148,6 +159,26 @@ fun TableTitle(
                 fontSize = 28.sp
             )
         )
+    }
+}
+
+@Composable
+fun TableButtonPack(){
+    Row (
+        Modifier
+            .padding(
+                end = 15.dp
+            )
+            .offset(
+                x = -50.dp,
+                y = 3.dp
+            )
+            .clip(RoundedCornerShape(8.dp, 8.dp, 0.dp, 0.dp))
+    ){
+        TableButton("추가")
+        TableButton("삭제")
+        //TableButton("제약조건")
+        TableButton("SQL")
     }
 }
 
@@ -531,25 +562,7 @@ fun TableButton(
 }
 
 
-@Composable
-fun TableButtonPack(){
-    Row (
-        Modifier
-            .padding(
-                end = 15.dp
-            )
-            .offset(
-                x = -50.dp,
-                y = 3.dp
-            )
-            .clip(RoundedCornerShape(8.dp, 8.dp, 0.dp, 0.dp))
-    ){
-        TableButton("추가")
-        TableButton("삭제")
-        TableButton("제약조건")
-        TableButton("SQL")
-    }
-}
+
 
 @Composable
 fun TableShadow(alpha: Float = 0.1f, height: Dp = 8.dp) {
@@ -609,4 +622,6 @@ fun HorizontalDividers(
     }
 }
 
-*/
+
+
+

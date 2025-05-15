@@ -454,6 +454,41 @@ public class EditDB extends SQLiteOpenHelper {
         return result;
     }
 
+    public String executeSQL(String sqlText) {
+        sqlText = sqlText.trim();
+        try {
+            if (sqlText.toLowerCase().startsWith("select")) {
+                Cursor cursor = db.rawQuery(sqlText, null);
+                StringBuilder result = new StringBuilder();
 
+                int columnCount = cursor.getColumnCount();
+                for (int i = 0; i < columnCount; i++) {
+                    result.append(cursor.getColumnName(i)).append("\t");
+                }
+                result.append("\n");
+
+                while (cursor.moveToNext()) {
+                    for (int i = 0; i < columnCount; i++) {
+                        result.append(cursor.getString(i)).append("\t");
+                    }
+                    result.append("\n");
+                }
+
+                cursor.close();
+                return result.toString();
+            } else {
+                db.execSQL(sqlText);
+                return "명령이 성공적으로 실행되었습니다.";
+            }
+        } catch (Exception e) {
+            return "에러: " + e.getMessage();
+        }
+    }
+
+    public void close() {
+        if (db != null) {
+            db.close();
+        }
+    }
 
 }
