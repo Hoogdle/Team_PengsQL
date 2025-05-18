@@ -45,17 +45,31 @@ object EditerComposableWrapper {
                     listViewModel.setItemInfo(name, type)
                     EditTableListDesign(listViewModel, navController)
                 }
-                composable("mod?name={name}&type={type}",
+                composable(
+                    "mod?name={name}&type={type}",
                     arguments = listOf(
                         navArgument("name") { type = NavType.StringType; defaultValue = "" },
-                        navArgument("type") { type = NavType.StringType; defaultValue = "" }
+                        navArgument("type") { type = NavType.StringType; defaultValue = "테이블" }
                     )
                 ) { backStackEntry ->
                     val name = backStackEntry.arguments?.getString("name") ?: ""
-                    val type = backStackEntry.arguments?.getString("type") ?: ""
-                    modViewModel.setItemInfo(name, type)
-                    EditTableModDesign(modViewModel, navController)
+                    val type = backStackEntry.arguments?.getString("type") ?: "테이블"
+
+                    if (name.isBlank()) {
+                        EditTableModNewDesign(
+                            viewModel = modViewModel,
+                            navController = navController
+                        )
+                    } else {
+                        EditTableModOldDesign(
+                            viewModel = modViewModel,
+                            navController = navController,
+                            name = name,
+                            type = type
+                        )
+                    }
                 }
+
             }
         }
     }

@@ -29,6 +29,7 @@ public class EditerMain extends AppCompatActivity {
         EditTableListViewModel listViewModel = new ViewModelProvider(this).get(EditTableListViewModel.class);
         EditTableModViewModel modViewModel = new ViewModelProvider(this).get(EditTableModViewModel.class);
 
+
         // EditDB 생성 및 모든 ViewModel에 공유 (예시로 Main만 먼저 연결)
         EditDB editDB = new EditDB(getApplicationContext(), databaseName);
         mainViewModel.setDatabaseName(databaseName);
