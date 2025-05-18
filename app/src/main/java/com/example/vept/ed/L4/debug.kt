@@ -81,7 +81,8 @@ fun DebugDropdown(navController: NavHostController) {
                 DropdownMenuItem(
                     text = { Text("Table mod") },
                     onClick = {
-                        navController.navigate("mod")
+                        // 새 테이블 추가 모드로 진입 (itemName 없음)
+                        navController.navigate("mod?name=&type=테이블")
                         expanded = false
                     }
                 )

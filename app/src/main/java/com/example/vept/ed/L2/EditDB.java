@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+
 import com.example.vept.sysops.L1.SysOpsDB;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -488,6 +489,152 @@ public class EditDB extends SQLiteOpenHelper {
     public void close() {
         if (db != null) {
             db.close();
+        }
+    }
+
+//    public List<TableField> getTableSchema(String tableName) {
+//        List<TableField> fields = new ArrayList<>();
+//
+//        try (Cursor cursor = db.rawQuery("PRAGMA table_info(`" + tableName + "`);", null)) {
+//            while (cursor.moveToNext()) {
+//                TableField field = new TableField(
+//                        cursor.getString(cursor.getColumnIndexOrThrow("name")),
+//                        cursor.getString(cursor.getColumnIndexOrThrow("type")),
+//                        cursor.getInt(cursor.getColumnIndexOrThrow("notnull")) == 1,
+//                        cursor.getInt(cursor.getColumnIndexOrThrow("pk")) == 1,
+//                        false, // autoIncrement는 별도 처리 필요
+//                        false, // unique도 별도 처리 필요
+//                        cursor.isNull(cursor.getColumnIndexOrThrow("dflt_value")) ? null : cursor.getString(cursor.getColumnIndexOrThrow("dflt_value")),
+//                        null, // check 조건은 별도 파싱 필요
+//                        "BINARY", // collate 기본값 (추후 PRAGMA 활용 가능)
+//                        null, // 외래키 테이블
+//                        null, // 외래키 컬럼
+//                        null, // onUpdate
+//                        null  // onDelete
+//                );
+//                fields.add(field);
+//            }
+//        } catch (Exception e) {
+//            Log.e("EditDB", "테이블 스키마 로드 실패: " + tableName, e);
+//        }
+//
+//        return fields;
+//    }
+
+
+    public List<String> getFieldNames(String tableName) {
+        List<String> fields = new ArrayList<>();
+        Cursor cursor = db.rawQuery("PRAGMA table_info(`" + tableName + "`);", null);
+        if (cursor.moveToFirst()) {
+            int nameIndex = cursor.getColumnIndex("name");
+            do {
+                fields.add(cursor.getString(nameIndex));
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return fields;
+    }
+
+    public boolean hasField(String tableName, String fieldName) {
+        Cursor cursor = db.rawQuery("PRAGMA table_info(`" + tableName + "`);", null);
+        boolean exists = false;
+        int nameIndex = cursor.getColumnIndex("name");
+        while (cursor.moveToNext()) {
+            if (cursor.getString(nameIndex).equals(fieldName)) {
+                exists = true;
+                break;
+            }
+        }
+        cursor.close();
+        return exists;
+    }
+
+    public boolean hasTable(String tableName) {
+        Cursor cursor = db.rawQuery(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name=?",
+                new String[]{tableName}
+        );
+        boolean exists = cursor.moveToFirst();
+        cursor.close();
+        return exists;
+    }
+
+    public void renameTable(String oldName, String newName) {
+        db.execSQL("ALTER TABLE `" + oldName + "` RENAME TO `" + newName + "`;");
+    }
+
+    public void clearFields(String tableName) {
+        // 필드를 삭제하는 것은 SQLite에서 직접 불가 → 새 테이블 생성 필요 (이건 복잡하니 단순화 필요 시 생략)
+    }
+
+    public void addField(String tableName, String fieldName) {
+        db.execSQL("ALTER TABLE `" + tableName + "` ADD COLUMN `" + fieldName + "` TEXT;");
+    }
+
+    public void createTable(String tableName, List<String> fields) {
+        StringBuilder sql = new StringBuilder();
+        sql.append("CREATE TABLE IF NOT EXISTS `").append(tableName).append("` (");
+        for (int i = 0; i < fields.size(); i++) {
+            sql.append("`").append(fields.get(i)).append("` TEXT");
+            if (i != fields.size() - 1) {
+                sql.append(", ");
+            }
+        }
+        sql.append(");");
+        db.execSQL(sql.toString());
+    }
+
+    public boolean isFieldReferenced(String tableName, String fieldName) {
+        try {
+            Cursor tablesCursor = db.rawQuery(
+                    "SELECT name FROM sqlite_master WHERE type='table'",
+                    null
+            );
+
+            while (tablesCursor.moveToNext()) {
+                String otherTable = tablesCursor.getString(0);
+                Cursor fkCursor = db.rawQuery("PRAGMA foreign_key_list(" + otherTable + ")", null);
+
+                while (fkCursor.moveToNext()) {
+                    String refTable = fkCursor.getString(fkCursor.getColumnIndexOrThrow("table"));
+                    String refColumn = fkCursor.getString(fkCursor.getColumnIndexOrThrow("to"));
+                    if (refTable.equals(tableName) && refColumn.equals(fieldName)) {
+                        fkCursor.close();
+                        tablesCursor.close();
+                        return true;
+                    }
+                }
+                fkCursor.close();
+            }
+            tablesCursor.close();
+        } catch (Exception e) {
+            e.printStackTrace();  // 로깅 용이
+        }
+        return false;
+    }
+
+
+
+
+    // SQLite 테이블에 PK가 존재하는지 확인
+    public boolean tableHasPrimaryKey(String tableName) {
+        try {
+            Cursor cursor = db.rawQuery(
+                    "PRAGMA table_info(" + tableName + ")", null
+            );
+
+            boolean hasPK = false;
+            while (cursor.moveToNext()) {
+                int pkIndex = cursor.getColumnIndex("pk");
+                if (pkIndex != -1 && cursor.getInt(pkIndex) > 0) {
+                    hasPK = true;
+                    break;
+                }
+            }
+            cursor.close();
+            return hasPK;
+        } catch (Exception e) {
+            return false;
         }
     }
 
