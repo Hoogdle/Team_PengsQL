@@ -32,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.vept.ed.L4.EditerMain
+import com.example.vept.pl.L4.PlannerMain
 
 import com.example.vept.sysops.L1.FileExplorer
 
@@ -160,9 +161,29 @@ fun TmpDesignButtonPack(
     viewModel: MainDesignViewModel
 ){
     Column(){
-        TmpDesignButton(viewModel,"버튼1")
+        TmpDiagramButton(viewModel,"새 다이어그램")
         TmpDesignButton(viewModel,"버튼2")
         TmpDesignButton(viewModel,"버튼3")
+    }
+}
+
+// 버튼123 개별
+@Composable
+fun TmpDiagramButton(
+    viewModel: MainDesignViewModel,
+    name: String // button nameD
+){
+    val context = LocalContext.current
+    Button(
+        onClick = {
+            val intent = Intent(context, PlannerMain::class.java)
+            context.startActivity(intent)
+
+        }
+    ) {
+        Text(
+            text = name
+        )
     }
 }
 
