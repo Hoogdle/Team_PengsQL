@@ -176,7 +176,6 @@ fun EditTableModNewDesign(
                     onClick = {
                         val pkCount = fields.count { it.isPrimaryKey }
                         if (pkCount > 1) {
-                            // 경고 메시지 (Toast/Snackbar/Log 중 택)
                             Log.e("EditTable", "PK는 하나만 지정해야 합니다.")
                             return@TextButton
                         }
@@ -184,7 +183,10 @@ fun EditTableModNewDesign(
                         val success = viewModel.createTableFromFields(tableName, fields)
                         if (success) {
                             showSqlDialog = false
-                            navController.popBackStack()
+                            navController.navigate("main") {
+                                popUpTo("main") { inclusive = true }
+                                launchSingleTop = true
+                            }
                         } else {
                             Log.e("EditTable", "테이블 생성 실패")
                         }
@@ -192,7 +194,7 @@ fun EditTableModNewDesign(
                     enabled = tableName.isNotBlank() && fields.isNotEmpty(),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("✅ 적용하기")
+                    Text("적용하기")
                 }
             },
             dismissButton = {

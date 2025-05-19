@@ -103,4 +103,11 @@ public class EditerMainViewModel extends ViewModel {
                 break;
         }
     }
+
+    public void refreshAllData() {
+        tableFieldMap.setValue(editDB.getTableAndFieldName());
+        indexInfo.setValue(editDB.getIndexInfo());
+        viewInfo.setValue(editDB.getViewInfo());
+        triggerList.setValue(editDB.getTriggerNames());
+    }
 }

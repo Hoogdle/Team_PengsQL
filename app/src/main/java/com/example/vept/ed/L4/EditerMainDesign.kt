@@ -21,6 +21,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -53,6 +54,9 @@ fun EditerMainDesign(
     navController: NavHostController
 ) {
     val databaseName = viewModel.databaseName
+
+
+
     Column(
         Modifier
             .background(BackGroundColor)
@@ -120,6 +124,11 @@ fun SelectDBTemplate(
     viewModel: EditerMainViewModel,
     navController: NavHostController
 ) {
+    LaunchedEffect(Unit) {
+        viewModel.refreshAllData()
+    }
+
+
     val indexInfoState by viewModel.indexInfo.observeAsState(emptyMap())
     val tableMap by viewModel.tableFieldMap.observeAsState(emptyMap())
     val viewMap by viewModel.viewInfo.observeAsState(emptyMap())
@@ -167,18 +176,14 @@ fun SectionWithHeaderAndItems(
     navController: NavHostController
 ) {
     val isSectionExpanded = expandedMap.getOrPut(headerName) { false }
-
-    // 항목이 0개일 경우 확장 아이콘은 숨기고, 항목 이름은 그대로 표시
     val shouldExpand = items.isNotEmpty()
 
     Column {
-        // 항목이 있을 때만 확장 가능하도록 처리
         Row(
             Modifier
                 .clickable { expandedMap[headerName] = !isSectionExpanded }
                 .padding(vertical = 8.dp)
         ) {
-            // 확장 아이콘: 항목이 있을 때만 표시
             if (shouldExpand) {
                 Icon(
                     painter = painterResource(
@@ -188,12 +193,8 @@ fun SectionWithHeaderAndItems(
                     tint = TextColor
                 )
             }
-
-            // 항목 이름: 항상 표시
             TextHeader(headName = headerName, size = items.size)
         }
-
-        // 확장된 항목을 표시
         if (isSectionExpanded) {
             items.forEach { (itemName, relatedList) ->
                 val itemKey = "$headerName::$itemName"
@@ -240,7 +241,6 @@ fun SelectTableItem(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Spacer(Modifier.width(40.dp))
 
-            // 확장 아이콘: 항목이 있을 때만 표시
             if (relatedList.isNotEmpty()) {
                 Icon(
                     modifier = Modifier.clickable { onExpandToggle() },
@@ -253,8 +253,6 @@ fun SelectTableItem(
 
                 Spacer(Modifier.width(7.dp))
             }
-
-            // 항목 이름과 관련 리스트 크기: 관련 리스트가 있을 때만 (0)을 표시
             Text(
                 modifier = Modifier.clickable { isDropDownExpanded.value = true },
                 text = "$itemName ${if (relatedList.isNotEmpty()) "(${relatedList.size})" else ""}",
@@ -281,7 +279,6 @@ fun SelectTableItem(
             }
         }
 
-        // 확장된 항목을 표시
         if (isExpanded) {
             relatedList.forEach {
                 Row {

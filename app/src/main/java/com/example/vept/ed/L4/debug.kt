@@ -19,7 +19,11 @@ fun ReturnToMainButton(navController: NavHostController) {
         contentAlignment = Alignment.TopCenter
     ) {
         Button(
-            onClick = { navController.navigate("main") },
+            onClick = {
+                navController.navigate("main") {
+                    popUpTo("main") { inclusive = true }
+                }
+            },
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.Red,
                 contentColor = Color.White
@@ -27,13 +31,12 @@ fun ReturnToMainButton(navController: NavHostController) {
             modifier = Modifier
                 .width(100.dp)
                 .height(36.dp),
-            shape = MaterialTheme.shapes.medium // 사각형 버튼
+            shape = MaterialTheme.shapes.medium
         ) {
             Text("메인", fontSize = 12.sp)
         }
     }
 }
-
 
 @Composable //main -> sql, list, mod 이동
 fun DebugDropdown(navController: NavHostController) {
