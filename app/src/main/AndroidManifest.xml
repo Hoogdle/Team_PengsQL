@@ -36,6 +36,10 @@
             android:name=".ed.L4.EditerMain"
             android:exported="false"
             android:theme="@style/Theme.VEPT" />
+        <activity
+            android:name=".pl.L4.PlannerMain"
+            android:exported="false"
+            android:theme="@style/Theme.VEPT" />
 
 
 

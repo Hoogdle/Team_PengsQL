@@ -1,5 +1,6 @@
 package com.example.vept.sysops.L1;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -70,6 +71,22 @@ public class SysOpsDB extends SQLiteOpenHelper {
         }
     }
 
+
+    @Override
+    public SQLiteDatabase getWritableDatabase() {
+        if (db == null || !db.isOpen()) {
+            openDatabase();
+        }
+        return db;
+    }
+
+    @Override
+    public SQLiteDatabase getReadableDatabase() {
+        return getWritableDatabase();
+    }
+
+
+
     public List<String> getDatabaseNames() {
         List<String> databaseNames = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();  // 읽기 모드 DB
@@ -104,7 +121,6 @@ public class SysOpsDB extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        // databases_info 테이블 생성
         db.execSQL("CREATE TABLE IF NOT EXISTS databases_info (" +
                 "database_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "database_name TEXT NOT NULL UNIQUE, " +
@@ -139,6 +155,39 @@ public class SysOpsDB extends SQLiteOpenHelper {
                 "    SET order_priority = order_priority + 1 " +
                 "    WHERE order_hierarchy_id = NEW.order_hierarchy_id; " + // 특정 행만 업데이트하도록 수정
                 "END;");
+    }
+
+
+    void createDatabaseInfoToDB(String databaseName, String originalPath, String interiorPath) {
+        Log.d("DBPathCheck", "originalPath: " + originalPath);
+        Log.d("DBPathCheck", "interiorPath: " + interiorPath);
+
+        // 1. 데이터베이스 정보 삽입
+        ContentValues values = new ContentValues();
+        values.put("database_name", databaseName);
+        values.put("original_path", originalPath);
+        values.put("interior_path", interiorPath);
+
+        long rowId = db.insert("databases_info", null, values);
+        if (rowId != -1) {
+            Log.d("FileExplorer", "Database info saved to SysOpsDB, row ID: " + rowId);
+
+            // 2. order_hierarchy에 데이터 삽입 (entity_type = "database"와 entity_id = database_id)
+            ContentValues orderHierarchyValues = new ContentValues();
+            orderHierarchyValues.put("entity_type", "database");
+            orderHierarchyValues.put("entity_id", rowId); // 삽입된 database_id를 사용
+            orderHierarchyValues.put("order_priority", 0); // 기본 값으로 0 설정
+
+            long orderHierarchyRowId = db.insert("order_hierarchy", null, orderHierarchyValues);
+            if (orderHierarchyRowId != -1) {
+                Log.d("FileExplorer", "Order hierarchy info saved, row ID: " + orderHierarchyRowId);
+            } else {
+                Log.e("FileExplorer", "Failed to insert order hierarchy info.");
+            }
+
+        } else {
+            Log.e("FileExplorer", "Failed to insert database info into SysOpsDB.");
+        }
     }
 
 

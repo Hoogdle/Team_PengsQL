@@ -6,7 +6,8 @@ object ComposableWrapper {
     @JvmStatic
     fun setComposableContent(composeView: ComposeView, viewModel: MainDesignViewModel) {
         composeView.setContent {
-            MainDesign(viewModel)
+            //MainDesign(viewModel)
+            Home(viewModel)
         }
     }
 }

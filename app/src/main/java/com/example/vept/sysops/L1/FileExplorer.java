@@ -121,6 +121,9 @@ public class FileExplorer {
     // 데이터베이스 정보를 SysOpsDB에 저장
     private void saveDatabaseInfoToDB(String databaseName, String originalPath, String interiorPath) {
         SQLiteDatabase db = sysOpsDB.getWritableDatabase();
+        Log.d("DBPathCheck", "originalPath: " + originalPath);
+        Log.d("DBPathCheck", "interiorPath: " + interiorPath);
+
 
         // 1. 데이터베이스 정보 삽입
         ContentValues values = new ContentValues();
