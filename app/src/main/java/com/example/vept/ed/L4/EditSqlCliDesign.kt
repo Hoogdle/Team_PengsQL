@@ -139,6 +139,7 @@ fun EditSqlCliDesign(
     ) }
 
 
+    // TextField, 10 증가에서 3 증가로 고쳤습니다. 3이 훨씬 부드럽게 돌아가는 거 같습니담.
     for(i in userInputs.size-1 downTo 0){
         if(userInputs[i].value != "" && i>lineNo.value-3){
             for(i in 0..2) userInputs.add(mutableStateOf(""))
