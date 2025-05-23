@@ -313,12 +313,12 @@ fun BarTop(
                             color = Color.LightGray
                         )
                         .width(columnWidths[index])
-                        .height(50.dp)
+                        .height(40.dp)
                         .width(50.dp)
                         .zIndex(1f)
                         .offset(
                             x = -4.dp,
-                            y= -8.dp
+                            y= -2.dp
                         ),
                     singleLine = true,
                     textStyle = TextStyle(
@@ -332,7 +332,7 @@ fun BarTop(
                                 Text(
                                     modifier = Modifier
                                         .offset(
-                                            y = 4.dp
+                                            y = 0.dp
                                         ),
                                     text = "Filter",
                                     color = Color.LightGray,
@@ -349,6 +349,10 @@ fun BarTop(
                             innerTextField = innerTextField,
                             value = filters.value[index],
                             interactionSource = interactionSource,
+                            contentPadding = TextFieldDefaults.textFieldWithoutLabelPadding(
+                                top = 0.dp,
+                                bottom = 0.dp
+                            ),
                             colors = TextFieldDefaults.colors(
                                 focusedTextColor = TextColor,
                                 unfocusedTextColor = TextColor,

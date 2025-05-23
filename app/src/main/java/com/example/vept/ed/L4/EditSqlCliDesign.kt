@@ -140,9 +140,9 @@ fun EditSqlCliDesign(
 
 
     for(i in userInputs.size-1 downTo 0){
-        if(userInputs[i].value != "" && i>lineNo.value-5){
-            for(i in 0..9) userInputs.add(mutableStateOf(""))
-            lineNo.value += 10
+        if(userInputs[i].value != "" && i>lineNo.value-3){
+            for(i in 0..2) userInputs.add(mutableStateOf(""))
+            lineNo.value += 3
         }
     }
 
