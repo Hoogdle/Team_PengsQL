@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -18,6 +19,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -33,17 +36,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.vept.ui.other.ArrowAndMenu
 import com.example.vept.R
 import com.example.vept.ui.other.ArrowAndMenuWithTitle
 import com.example.vept.ui.theme.BackGroundColor
+import com.example.vept.ui.theme.ButtonColor
+import com.example.vept.ui.theme.ButtonTextColor
 import com.example.vept.ui.theme.TableBackGroundColor
 import com.example.vept.ui.theme.TextColor
 import com.example.vept.ui.theme.TitleColor
@@ -324,6 +332,65 @@ fun SelectTableItem(
         }
     }
 }
+
+@Composable
+fun EditMainButton(
+    text: String,
+    navController: NavController? = null,
+    navDestination: String? = null,
+    onClickFunction: () -> Unit
+){
+    Button(
+        contentPadding = PaddingValues(7.dp),
+        modifier = Modifier
+            .height(30.dp)
+            .padding(
+                start = 1.dp,
+                end = 1.dp
+            )
+        ,
+        onClick = {
+            onClickFunction()
+        },
+        colors = ButtonColors(
+            contentColor = ButtonTextColor,
+            containerColor = ButtonColor,
+            disabledContainerColor = ButtonColor,
+            disabledContentColor = ButtonTextColor
+        ),
+        shape = RectangleShape
+    ) {
+        Text(
+            textAlign = TextAlign.Center,
+            text = text,
+            style = TextStyle(
+                color = ButtonTextColor,
+                fontFamily = FontFamily(Font(R.font.pretendard_bold)),
+                fontSize = 15.sp
+            )
+        )
+    }
+}
+
+
+@Composable
+fun EditMainButtonPack(){
+    Row (
+        Modifier
+            .padding(
+                end = 15.dp
+            )
+            .offset(
+                y = 16.dp
+            )
+            .clip(RoundedCornerShape(8.dp,8.dp,0.dp,0.dp))
+    ){
+        EditMainButton("버튼1", onClickFunction = {})
+        EditMainButton("버튼2", onClickFunction = {})
+        EditMainButton("버튼3", onClickFunction = {})
+    }
+}
+
 
 @Composable
 fun SelectDBButtonPack(){

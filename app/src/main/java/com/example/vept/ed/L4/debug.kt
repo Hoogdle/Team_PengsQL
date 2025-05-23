@@ -39,7 +39,6 @@ fun DebugDropdown(navController: NavHostController) {
 
     Box(
         modifier = Modifier
-            .fillMaxWidth()
             .offset(
                 y = 10.dp
             )

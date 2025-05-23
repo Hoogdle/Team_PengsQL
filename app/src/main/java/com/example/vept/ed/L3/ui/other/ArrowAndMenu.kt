@@ -18,6 +18,7 @@ import androidx.navigation.NavHostController
 import com.example.vept.R
 import com.example.vept.ed.L4.CLIButtonPack
 import com.example.vept.ed.L4.DebugDropdown
+import com.example.vept.ed.L4.EditMainButtonPack
 import com.example.vept.ed.L4.EditSqlCliViewModel
 import com.example.vept.ed.L4.ReturnToMainButton
 import com.example.vept.ed.L4.SelectDBTitle
@@ -54,6 +55,7 @@ fun ArrowAndMenuWithTitle(
     navController: NavHostController
 ){
     Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
             .fillMaxWidth()
             .padding(
@@ -71,7 +73,11 @@ fun ArrowAndMenuWithTitle(
             )
             Modifier.width(10.dp)
             SelectDBTitle(title)
+        }
+
+        Row {
             Modifier.width(25.dp)
+            EditMainButtonPack()
             DebugDropdown(navController = navController)
             ReturnToMainButton(navController)       //<<===디버그용===!!//
         }
