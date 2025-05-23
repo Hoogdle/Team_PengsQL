@@ -72,8 +72,9 @@ fun EditMCPsDesign(
     val count = remember { mutableStateOf(0) }
 //    val storedInfo = remember { mutableStateListOf("안녕하세요. PengSQL AI assistant 입니다. 무엇을 도와드릴까요?","피카츄랑 리자몽이랑 싸우면 과연 누가 이길까? 물론 피카츄가 몸집은 리장몽에 비해 매우 작지만..", "저는 리자몽이 이길 것이라 생각해요. 리자몽은 불 타입이고 피카츄는 번개 타입인데....", "아니 그래도 피카츄가 이길 수도 있지 않을까? 리자몽은 몸이 크니깐 둔할 거고, 이런 약점을 민첩한 피카츄가 잘 이용한다면...","아니 그래도 피카츄가 이길 수도 있지 않을까? 리자몽은 몸이 크니깐 둔할 거고, 이런 약점을 민첩한 피카츄가 잘 이용한다면...","아니 그래도 피카츄가 이길 수도 있지 않을까? 리자몽은 몸이 크니깐 둔할 거고, 이런 약점을 민첩한 피카츄가 잘 이용한다면...","아니 그래도 피카츄가 이길 수도 있지 않을까? 리자몽은 몸이 크니깐 둔할 거고, 이런 약점을 민첩한 피카츄가 잘 이용한다면...","아니 그래도 피카츄가 이길 수도 있지 않을까? 리자몽은 몸이 크니깐 둔할 거고, 이런 약점을 민첩한 피카츄가 잘 이용한다면...","아니 그래도 피카츄가 이길 수도 있지 않을까? 리자몽은 몸이 크니깐 둔할 거고, 이런 약점을 민첩한 피카츄가 잘 이용한다면...") }
 
-    val storedInfo = remember { mutableStateListOf("안녕하세요. PengSQL AI assistant 입니다. 무엇을 도와드릴까요?","피카츄랑 리자몽이랑 싸우면 과연 누가 이길까? 물론 피카츄가 몸집은 리장몽에 비해 매우 작지만..") }
+    val storedInfo = remember { mutableStateListOf("안녕하세요. PengSQL AI assistant 입니다. 무엇을 도와드릴까요?") }
     Log.e("zxc",storedInfo.size.toString())
+    Log.e("zxc",storedInfo[storedInfo.size-1])
 
 
     Scaffold(
@@ -128,12 +129,12 @@ fun EditMCPsTemplate(
 
         EditMCPsAITurn(storedInfo[0])
 
-        for(i in 1..(storedInfo.size/2)){
-            EditMCPsUserTurn(storedInfo[i])
-
-            if(i == (storedInfo.size/2) && storedInfo.size%2==0){}
+        for(i in 1..storedInfo.size-1){
+            if(i%2==0) {
+                EditMCPsAITurn(storedInfo[i])
+            }
             else {
-                EditMCPsAITurn(storedInfo[i+1])
+                EditMCPsUserTurn(storedInfo[i])
             }
         }
         Spacer(Modifier.height(65.dp))
@@ -367,7 +368,8 @@ fun EditMCPsTextField(
             onClick = {
                 Log.e("zxc",input.value)
                 storedInfo.add(input.value)
-//                storedInfo.add("AI의 새로운 답변") // 임시적으로, 디자인 테스트를 위해 2개를 add한 것. 원래는 유저 추가 후 AI 의 답변을 기다린 후 추가
+
+                storedInfo.add("AI의 새로운 답변") // 임시적으로, 디자인 테스트를 위해 2개를 add한 것. 원래는 유저 추가 후 AI 의 답변을 기다린 후 추가
                 input.value = ""
             }
         ) {
