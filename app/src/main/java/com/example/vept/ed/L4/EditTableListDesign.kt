@@ -80,6 +80,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.AlertDialog
 
 import androidx.compose.ui.unit.max
@@ -87,17 +90,22 @@ import androidx.compose.ui.unit.times
 import kotlin.math.ceil
 
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.sp
-
-
-
+import androidx.compose.ui.zIndex
+import com.example.vept.ui.other.ArrowAndMenuWithTitle
+import com.example.vept.ui.theme.TextColor
 
 
 @Composable
@@ -118,16 +126,8 @@ fun EditTableListDesign(
             .background(BackGroundColor)
             .padding(top = 25.dp)
     ){
-        ArrowAndMenu()
-        Spacer(modifier = Modifier.height(15.dp))
-        Row (
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ){
-            SelectDBTitle("$TableName")
-            ReturnToMainButton(navController)       //<<===디버그용===!!//
-        }
+        ArrowAndMenuWithTitle(TableName,navController)
+
         DBTable(
             viewModel = viewModel,
             TableName = TableName,
@@ -243,12 +243,16 @@ fun DBTable(
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BarTop(
     fieldNames: List<String>,
     columnWidths: List<Dp>,
     filters: MutableState<List<String>>
 ) {
+
+    val interactionSource = remember{ MutableInteractionSource() }
+
     Column {
         Row {
             Spacer(Modifier.width(60.dp))
@@ -257,7 +261,7 @@ fun BarTop(
                     modifier = Modifier
                         .width(columnWidths[index])
                         .height(40.dp)
-                        .border(1.dp, Color.Gray)
+                        .border(0.5.dp, Color.LightGray)
                         .padding(8.dp),
                     contentAlignment = Alignment.CenterStart
                 ) {
@@ -272,19 +276,92 @@ fun BarTop(
         }
         Row {
             Spacer(Modifier.width(60.dp))
+//            fieldNames.forEachIndexed { index, _ ->
+//                TextField(
+//                    value = filters.value[index],
+//                    onValueChange = { newValue ->
+//                        filters.value = filters.value.toMutableList().also {
+//                            it[index] = newValue
+//                        }
+//                    },
+//                    modifier = Modifier
+//                        .width(columnWidths[index])
+//                        .height(40.dp)
+//                        .border(0.5.dp, Color.LightGray),
+//                    singleLine = true
+//                )
+//            }
+
             fieldNames.forEachIndexed { index, _ ->
-                TextField(
+                BasicTextField(
+                    // 필터 입력 후 Action에 대해 정의
+                    keyboardActions = KeyboardActions(
+                        // 예시)
+                        // 백엔드로 필터링 된 데이터 요청 함수
+                        // callFilter2Backend(input)
+                    ),
                     value = filters.value[index],
-                    onValueChange = { newValue ->
+                    onValueChange = {
+                            newValue ->
                         filters.value = filters.value.toMutableList().also {
                             it[index] = newValue
                         }
                     },
                     modifier = Modifier
+                        .border(
+                            width = 0.5.dp,
+                            color = Color.LightGray
+                        )
                         .width(columnWidths[index])
-                        .height(40.dp)
-                        .border(1.dp, Color.Gray),
-                    singleLine = true
+                        .height(50.dp)
+                        .width(50.dp)
+                        .zIndex(1f)
+                        .offset(
+                            x = -4.dp,
+                            y= -8.dp
+                        ),
+                    singleLine = true,
+                    textStyle = TextStyle(
+
+                        fontSize = 14.sp
+                    ),
+
+                    decorationBox = @Composable{ innerTextField ->
+                        TextFieldDefaults.DecorationBox(
+                            placeholder = {
+                                Text(
+                                    modifier = Modifier
+                                        .offset(
+                                            y = 4.dp
+                                        ),
+                                    text = "Filter",
+                                    color = Color.LightGray,
+                                    style = TextStyle(
+                                        color = TitleColor,
+                                        fontFamily = FontFamily(Font(R.font.roboto_regular)),
+                                        fontSize = 14.sp
+                                    ),
+                                )
+                            },
+                            singleLine = true,
+                            visualTransformation = VisualTransformation.None,
+                            enabled = true,
+                            innerTextField = innerTextField,
+                            value = filters.value[index],
+                            interactionSource = interactionSource,
+                            colors = TextFieldDefaults.colors(
+                                focusedTextColor = TextColor,
+                                unfocusedTextColor = TextColor,
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                                cursorColor = TextColor,
+                                unfocusedContainerColor = Color.Transparent,
+                                focusedContainerColor = Color.Transparent,
+                                errorContainerColor = Color.Transparent,
+                                disabledContainerColor = Color.Transparent
+                            )
+                        )
+                    }
                 )
             }
         }
@@ -309,7 +386,7 @@ fun BarLeftIndex(
                 modifier = Modifier
                     .width(width)
                     .height(rowHeights[index])
-                    .border(1.dp, Color.Gray),
+                    .border(0.5.dp, Color.LightGray),
                 contentAlignment = Alignment.Center
             ) {
                 Text(text = numStr)
@@ -338,7 +415,7 @@ fun BoxTable(
                     val modifier = Modifier
                         .width(width)
                         .height(height)
-                        .border(1.dp, Color.Gray)
+                        .border(0.5.dp, Color.LightGray)
 
                     if (isEditable) {
                         EditableTableCell(
@@ -507,22 +584,23 @@ fun PageController(
         // -1 페이지로
         DBTableArrowButton(ArrowDirection.LEFT, currentPage)
 
-        Spacer(Modifier.width(8.dp))
 
         // 직접 입력
         BasicTextField(
             value = input.value,
             onValueChange = { input.value = it },
             modifier = Modifier
+                .offset(
+                    x = 20.dp,
+                    y = 3.dp
+                )
                 .width(50.dp)
                 .height(45.dp)
-                .background(Color.LightGray, RoundedCornerShape(4.dp))
-                .padding(horizontal = 8.dp, vertical = 4.dp),
+                .padding(),
             textStyle = TextStyle(color = Color.Black, fontSize = 16.sp),
             singleLine = true
         )
 
-        Spacer(Modifier.width(4.dp))
 
         // +1 페이지로
         DBTableArrowButton(ArrowDirection.RIGHT, currentPage)

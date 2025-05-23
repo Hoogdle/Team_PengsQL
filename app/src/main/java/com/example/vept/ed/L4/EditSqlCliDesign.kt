@@ -1,5 +1,6 @@
 package com.example.vept.ed.L4
 
+import android.annotation.SuppressLint
 import android.text.BoringLayout
 import android.util.Log
 import android.widget.Space
@@ -85,6 +86,8 @@ import com.example.vept.ui.theme.TextColor
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -97,6 +100,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -107,15 +111,46 @@ import androidx.compose.material3.Divider
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.geometry.Offset
+import com.example.vept.ui.other.ArrowAndMenuCLI
 
+@SuppressLint("UnrememberedMutableState")
 @Composable
 fun EditSqlCliDesign(
     viewModel: EditSqlCliViewModel,
     navController: NavHostController
 ) {
-    val textState = remember { mutableStateOf("") }
+    val lineNo = remember { mutableStateOf(10) }
+    val userInputs = remember { mutableListOf(
+        mutableStateOf(""),
+        mutableStateOf(""),
+        mutableStateOf(""),
+        mutableStateOf(""),
+        mutableStateOf(""),
+        mutableStateOf(""),
+        mutableStateOf(""),
+        mutableStateOf(""),
+        mutableStateOf(""),
+        mutableStateOf(""),
+    ) }
+
+
+    for(i in userInputs.size-1 downTo 0){
+        if(userInputs[i].value != "" && i>lineNo.value-5){
+            for(i in 0..9) userInputs.add(mutableStateOf(""))
+            lineNo.value += 10
+        }
+    }
+
     val cliResult by viewModel.getCliResult().observeAsState()
     val visible = remember { mutableStateOf(false) }
+
+    val verticalScrollState = rememberScrollState()
+    val horizontalScrollState = rememberScrollState()
 
     LaunchedEffect(cliResult) {
         if (!cliResult.isNullOrBlank()) {
@@ -130,17 +165,28 @@ fun EditSqlCliDesign(
                 .padding(top = 25.dp)
                 .fillMaxSize()
         ) {
-            ArrowAndMenu()
-            Spacer(modifier = Modifier.height(15.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                SelectDBTitle("SQL CLI")
-                CLIButtonPack(viewModel = viewModel, textState = textState)
+            ArrowAndMenuCLI(
+                title = "SQL CLI",
+                navController = navController,
+                viewModel = viewModel,
+                textState = userInputs,
+            )
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(BackGroundColor)
+                    .clip(RoundedCornerShape(topStart = 35.dp, topEnd = 35.dp))
+                    .background(TableBackGroundColor)
+                    .padding(horizontal = 30.dp)
+                    .verticalScroll(verticalScrollState)
+                    .horizontalScroll(horizontalScrollState)
+//                    .horizontalScroll(horizontalScrollState)
+//                    .verticalScroll(verticalScrollState)
+            ){
+                for(i in 0..userInputs.size-1){
+                    CLIOneLine(i+1,userInputs[i],offset = -(i*28).dp)
+                }
             }
-            SqlCliWithIndexBar(textState = textState)
         }
 
         // 결과창
@@ -174,18 +220,24 @@ fun EditSqlCliDesign(
 @Composable
 fun CLIButtonPack(
     viewModel: EditSqlCliViewModel,
-    textState: MutableState<String>
+    textState: MutableList<MutableState<String>>,
 ) {
     Row(
         Modifier
-            .padding(end = 15.dp)
-            .offset(x = (-50).dp, y = 3.dp)
+            .offset(
+                y = 15.dp
+            )
             .clip(RoundedCornerShape(8.dp, 8.dp, 0.dp, 0.dp))
     ) {
         CLIButton(
             R.drawable.cli_right_arrow,
             onClick = {
-                viewModel.executeSQL(textState.value)
+                var result: String = ""
+                textState.forEachIndexed { index, item ->
+                    result += item.value
+                }
+                Log.e("ddd",result)
+                viewModel.executeSQL(result)
             }
         )
         CLIButton(
@@ -237,58 +289,76 @@ fun CLIButton(
 
 
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SqlCliWithIndexBar(
-    textState: MutableState<String>
+    lineNo: MutableState<Int>,
+    textState: MutableList<MutableState<String>>
 ) {
-    val scrollState = rememberScrollState()
 
-    val indexText = remember(textState.value) {
-        val lineCount = textState.value.count { it == '\n' } + 1
-        (1..lineCount).joinToString("\n") { it.toString() }
-    }
+
+    val scrollState = rememberScrollState()
+    val bringIntoViewRequester = remember { BringIntoViewRequester() }
+
 
     Row(
         Modifier
             .fillMaxSize()
             .background(TableBackGroundColor)
             .padding(10.dp)
-    ) {
-        // Index TextField (읽기 전용)
-        BasicTextField(
-            value = indexText,
-            onValueChange = {}, // 읽기 전용
-            enabled = false,
-            readOnly = true,
-            modifier = Modifier
-                .width(40.dp)
-                .background(Color.DarkGray)
-                .verticalScroll(scrollState),
 
-            textStyle = TextStyle(
-                fontSize = 20.sp,
-                color = Color.White,
-                textAlign = TextAlign.End
-            )
-        )
+    ) {
 
         Spacer(modifier = Modifier.width(8.dp))
 
         // Main Input Field
-        BasicTextField(
-            value = textState.value,
-            onValueChange = { textState.value = it },
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState),
-            textStyle = TextStyle(
-                fontSize = 20.sp,
-                color = Color.Black
-            )
-        )
+
     }
 }
 
+@Composable
+fun CLIOneLine(
+    lineNoFixed: Int,
+    lineContents: MutableState<String>,
+    offset: Dp = 0.dp
+){
+    Row(
+        modifier = Modifier
+            .offset(
+                y = offset
+            )
+    ){
+        Text(
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .width(35.dp)
+                .offset(
+                    x = 15.dp,
+                    y = 19.5f.dp
+                ),
+            text = lineNoFixed.toString(),
+            style = TextStyle(
+                color = TextColor,
+                fontFamily = FontFamily(Font(R.font.roboto_bold)),
+                fontSize = 20.sp
+            )
+        )
+        Spacer(Modifier.width(8.dp))
+        VerticalDividers(
+            modifier = Modifier
+                .height(33.dp)
+                .offset(
+                    x = 20.dp,
+                    y = 20.dp
+                )
+            ,
+            thickness = 1.dp,
+            color = Color.LightGray
+        )
+        Spacer(Modifier.width(8.dp))
+        CLITextField(lineContents)
+    }
+}
 
 @Composable
 fun CLIResultBox(
@@ -316,4 +386,101 @@ fun CLIResultBox(
             )
         }
     }
+}
+
+@Composable
+fun VerticalDividers(
+    modifier: Modifier = Modifier,
+    thickness: Dp = DividerDefaults.Thickness,
+    color: Color = DividerDefaults.color,
+) {
+    Row() {
+        Canvas(
+            modifier
+                .fillMaxHeight()
+                .width(thickness)
+        ) {
+            drawLine(
+                color = color,
+                strokeWidth = thickness.toPx(),
+                start = Offset(thickness.toPx() / 2, 0f),
+                end = Offset(thickness.toPx() / 2, size.height),
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CLITextField(
+    input: MutableState<String>
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val (focusRequester) = FocusRequester.createRefs()
+    BasicTextField(
+        // 필터 입력 후 Action에 대해 정의
+        keyboardOptions = KeyboardOptions(
+            imeAction = ImeAction.Next
+        ),
+        keyboardActions = KeyboardActions(
+
+            onDone = {},
+
+        ),
+        value = input.value,
+        onValueChange = {
+            input.value = it
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .focusRequester(focusRequester)
+            .padding(
+                start = 10.dp,
+                end = 10.dp
+            )
+            .clip(RoundedCornerShape(15.dp))
+            .background(
+                color = Color.Transparent
+            )
+            .height(60.dp),
+        singleLine = true,
+        textStyle = TextStyle(
+            color = TextColor,
+            fontFamily = FontFamily(Font(R.font.pretendard_regular)),
+            fontSize = 20.sp
+        ),
+
+        decorationBox = @Composable { innerTextField ->
+            TextFieldDefaults.DecorationBox(
+                placeholder = {
+                    Text(
+                        text = "text",
+                        color = Color.LightGray,
+                        style = TextStyle(
+                            color = TextColor,
+                            fontFamily = FontFamily(Font(R.font.roboto_regular)),
+                            fontSize = 20.sp
+                        ),
+                    )
+                },
+                singleLine = true,
+                visualTransformation = VisualTransformation.None,
+                enabled = true,
+                innerTextField = innerTextField,
+                value = input.value.toString(),
+                interactionSource = interactionSource,
+                colors = TextFieldDefaults.colors(
+                    focusedTextColor = TextColor,
+                    unfocusedTextColor = TextColor,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    cursorColor = TextColor,
+                    unfocusedContainerColor = Color.Transparent,
+                    focusedContainerColor = Color.Transparent,
+                    errorContainerColor = Color.Transparent,
+                    disabledContainerColor = Color.Transparent
+                ),
+            )
+        }
+    )
 }

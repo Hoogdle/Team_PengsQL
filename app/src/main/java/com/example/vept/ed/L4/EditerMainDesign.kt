@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -41,6 +42,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.vept.ui.other.ArrowAndMenu
 import com.example.vept.R
+import com.example.vept.ui.other.ArrowAndMenuWithTitle
 import com.example.vept.ui.theme.BackGroundColor
 import com.example.vept.ui.theme.TableBackGroundColor
 import com.example.vept.ui.theme.TextColor
@@ -62,16 +64,14 @@ fun EditerMainDesign(
             .background(BackGroundColor)
             .padding(top = 25.dp)
     ) {
-        ArrowAndMenu()
-        Spacer(modifier = Modifier.height(15.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            SelectDBTitle(databaseName)
-            DebugDropdown(navController = navController)
-            SelectDBButtonPack()
-        }
+
+        ArrowAndMenuWithTitle(databaseName,navController)
+//        Row(
+//            modifier = Modifier.fillMaxWidth(),
+//            horizontalArrangement = Arrangement.SpaceBetween
+//        ) {
+//            SelectDBButtonPack()
+//        }
         SelectDBTemplate(viewModel, navController)
     }
 }
@@ -82,10 +82,14 @@ fun EditerMainDesign(
 fun SelectDBTitle(
     text: String
 ){
-    Column {
+    Column{
         Text(
             modifier = Modifier
-                .padding(start = 45.dp),
+                .padding(start = 45.dp)
+                .offset(
+                    y = -6.dp
+                )
+            ,
             text = text,
             style = TextStyle(
                 color = TitleColor,
@@ -101,6 +105,10 @@ fun SelectDBTitle(
 @Composable
 fun TextHeader(headName: String, size: Int) {
     Text(
+        modifier = Modifier
+            .padding(
+                top = 7.dp
+            ),
         text = "$headName ($size)",
         style = TextStyle(
             color = TextColor,
@@ -141,12 +149,19 @@ fun SelectDBTemplate(
 
     Row(
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxWidth()
+            .fillMaxHeight()
+            .background(BackGroundColor)
+            .clip(shape = RoundedCornerShape(35.dp, 35.dp, 0.dp, 0.dp))
             .background(TableBackGroundColor)
+            .padding(
+                start = 30.dp,
+                end = 30.dp,
+            )
             .verticalScroll(verticalScrollState)
-            .padding(horizontal = 30.dp)
     ) {
         Column {
+
             listOf("테이블", "인덱스", "뷰", "트리거").forEach { section ->
                 val items = when (section) {
                     "테이블" -> tableMap
@@ -180,12 +195,26 @@ fun SectionWithHeaderAndItems(
 
     Column {
         Row(
-            Modifier
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
                 .clickable { expandedMap[headerName] = !isSectionExpanded }
                 .padding(vertical = 8.dp)
         ) {
             if (shouldExpand) {
+
                 Icon(
+                    modifier = Modifier
+                        .padding(
+                            top = 2.dp
+                        )
+                        .padding(
+                            start = if(isSectionExpanded) 0.dp else 10.dp,
+                            top = if(isSectionExpanded) 0.dp else 3.dp,
+                        )
+                        .offset(
+                            x = if(isSectionExpanded) 0.dp else -5.dp
+                        )
+                    ,
                     painter = painterResource(
                         if (isSectionExpanded) R.drawable.small_down else R.drawable.right_arrow
                     ),
@@ -239,11 +268,17 @@ fun SelectTableItem(
 
     Column {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Spacer(Modifier.width(40.dp))
+            Spacer(Modifier
+                .width( if(isExpanded) 30.dp else 40.dp)
+            )
 
             if (relatedList.isNotEmpty()) {
                 Icon(
-                    modifier = Modifier.clickable { onExpandToggle() },
+                    modifier = Modifier
+                        .offset(
+                            x = if(isExpanded) 4.dp else 0.dp
+                        )
+                        .clickable { onExpandToggle() },
                     painter = painterResource(
                         if (isExpanded) R.drawable.small_down else R.drawable.right_arrow
                     ),
