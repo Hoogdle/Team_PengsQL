@@ -34,10 +34,12 @@
 
         <activity
             android:name=".ed.L4.EditerMain"
+            android:screenOrientation="landscape"
             android:exported="false"
             android:theme="@style/Theme.VEPT" />
         <activity
             android:name=".pl.L4.PlannerMain"
+            android:screenOrientation="landscape"
             android:exported="false"
             android:theme="@style/Theme.VEPT" />
 

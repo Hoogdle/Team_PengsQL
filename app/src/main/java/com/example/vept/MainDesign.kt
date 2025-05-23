@@ -13,10 +13,12 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -37,6 +39,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
@@ -83,8 +86,6 @@ fun Home(
 ){
 
 
-
-
     val context = LocalContext.current
 
 
@@ -93,23 +94,22 @@ fun Home(
             .fillMaxSize()
             .background(BackGroundColor)
             .padding(
-                top = 25.dp
+                top = 10.dp
             )
     ){
         OnlyMenu()
         Spacer(Modifier.height(5.dp))
-        Image(
+
+        Row(
             modifier = Modifier
-                .height(50.dp)
-                .offset(
-                    x= 100.dp,
-                ),
-            painter = painterResource(R.drawable.home_title),
-            contentDescription = ""
-        )
-        Row(){
+                .fillMaxWidth()
+                .fillMaxHeight()
+            ,
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ){
             HomeDBList(viewModel)
-            Spacer(Modifier.width(140.dp))
+            Spacer(Modifier.width(65.dp))
             Column(
                 modifier = Modifier
                     .offset(
@@ -124,7 +124,7 @@ fun Home(
 
                     }
                 )
-                Spacer(Modifier.height(45.dp))
+                Spacer(Modifier.height(25.dp))
                 HomeButton(
                     contents = "DB 생성",
                     onClick = {
@@ -133,7 +133,7 @@ fun Home(
 
                     }
                 )
-                Spacer(Modifier.height(45.dp))
+                Spacer(Modifier.height(25.dp))
                 Row {
                     HomeButton(
                         contents = "모듈 관리자",
@@ -184,120 +184,144 @@ fun HomeDBList(
 
 
 
-    Column(
+
+
+    Column (
         modifier = Modifier
-            .offset(
-                x = 100.dp
+            .padding(
+                bottom = 50.dp
             )
-            .shadow(elevation = 25.dp)
-            .clip(RoundedCornerShape(10.dp))
-            .background(HomeDBListColor)
-            .width(350.dp)
-            .height(230.dp)
-            .verticalScroll(scrollState)
     ){
-        fileData.forEach { fileName ->
-            Row (
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ){
-                Text(
-                    modifier = Modifier
-                        .padding(
-                            10.dp
-                        )
-                        .fillMaxWidth()
-                        .weight(8f)
-                        .height(30.dp)
-                        .offset(
-
-                        )
-                    ,
-                    text = fileName,
-                    style = TextStyle(
-                        color = TextColor,
-                        fontFamily = FontFamily(Font(R.font.roboto_regular)),
-                        fontSize = 18.sp
-                    )
+        Image(
+            modifier = Modifier
+                .height(50.dp)
+                .padding(
+                    start = 70.dp
                 )
-
-                Button(
-                    contentPadding = PaddingValues(0.dp),
-                    colors = ButtonColors(
-                        containerColor = Color.Transparent,
-                        contentColor = Color.Transparent,
-                        disabledContentColor = Color.Transparent,
-                        disabledContainerColor = Color.Transparent
-                    ),
+                .offset(
+                    y = -5.dp
+                ),
+            painter = painterResource(R.drawable.home_title),
+            contentDescription = ""
+        )
+        Column(
+            modifier = Modifier
+                .padding(
+                    start = 70.dp
+                )
+                .offset(
+                )
+                .shadow(elevation = 25.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(HomeDBListColor)
+                .width(350.dp)
+                .height(230.dp)
+                .verticalScroll(scrollState)
+        ){
+            fileData.forEach { fileName ->
+                Row (
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                        .size(20.dp)
-                        .offset(
-                            y = 10.dp
-                        ),
-                    onClick = {
-                        val intent = Intent(context, EditerMain::class.java)
-                        intent.putExtra(EditerMain.EXTRA_DATABASE_NAME, fileName)
-                        context.startActivity(intent)
-                    }
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.edit),
-                        contentDescription = "",
-                        tint = Color(71,144,247)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ){
+                    Text(
+                        modifier = Modifier
+                            .padding(
+                                10.dp
+                            )
+                            .fillMaxWidth()
+                            .weight(8f)
+                            .height(30.dp)
+                            .offset(
+
+                            )
+                        ,
+                        text = fileName,
+                        style = TextStyle(
+                            color = TextColor,
+                            fontFamily = FontFamily(Font(R.font.roboto_regular)),
+                            fontSize = 18.sp
+                        )
                     )
+
+                    Button(
+                        contentPadding = PaddingValues(0.dp),
+                        colors = ButtonColors(
+                            containerColor = Color.Transparent,
+                            contentColor = Color.Transparent,
+                            disabledContentColor = Color.Transparent,
+                            disabledContainerColor = Color.Transparent
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                            .size(20.dp)
+                            .offset(
+                                y = 10.dp
+                            ),
+                        onClick = {
+                            val intent = Intent(context, EditerMain::class.java)
+                            intent.putExtra(EditerMain.EXTRA_DATABASE_NAME, fileName)
+                            context.startActivity(intent)
+                        }
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.edit),
+                            contentDescription = "",
+                            tint = Color(71,144,247)
+                        )
+                    }
+
+                    Spacer(Modifier.width(5.dp))
+
+                    Button(
+                        contentPadding = PaddingValues(0.dp),
+                        colors = ButtonColors(
+                            containerColor = Color.Transparent,
+                            contentColor = Color.Transparent,
+                            disabledContentColor = Color.Transparent,
+                            disabledContainerColor = Color.Transparent
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                            .size(20.dp)
+                            .offset(
+                                x = -8.dp,
+                                y = 10.dp
+                            ),
+                        onClick = {
+                            AlertDialog.Builder(context)
+                                .setTitle("삭제 확인")
+                                .setMessage("'$fileName'을 삭제하시겠습니까?")
+                                .setPositiveButton("삭제") { _, _ ->
+                                    viewModel.deleteDatabase(context, fileName)
+                                }
+                                .setNegativeButton("취소", null)
+                                .show()
+                        }
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.new_del),
+                            contentDescription = "",
+                            tint = Color(223,34,37)
+
+                        )
+                    }
+
                 }
 
-                Spacer(Modifier.width(0.dp))
-
-                Button(
-                    contentPadding = PaddingValues(0.dp),
-                    colors = ButtonColors(
-                        containerColor = Color.Transparent,
-                        contentColor = Color.Transparent,
-                        disabledContentColor = Color.Transparent,
-                        disabledContainerColor = Color.Transparent
-                    ),
+                HorizontalDivider(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f)
-                        .size(20.dp)
                         .offset(
-                            x = -8.dp,
-                            y = 10.dp
-                        ),
-                    onClick = {
-                        AlertDialog.Builder(context)
-                            .setTitle("삭제 확인")
-                            .setMessage("'$fileName'을 삭제하시겠습니까?")
-                            .setPositiveButton("삭제") { _, _ ->
-                                viewModel.deleteDatabase(context, fileName)
-                            }
-                            .setNegativeButton("취소", null)
-                            .show()
-                    }
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.new_del),
-                        contentDescription = "",
-                        tint = Color(223,34,37)
-
-                    )
-                }
-
+                            y = -5.dp
+                        )
+                )
             }
-
-            HorizontalDivider(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .offset(
-                        y = -5.dp
-                    )
-            )
         }
     }
+
 }
 
 @Composable
