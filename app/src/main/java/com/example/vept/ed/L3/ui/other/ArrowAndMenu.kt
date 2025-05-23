@@ -52,7 +52,8 @@ fun ArrowAndMenu(){
 @Composable
 fun ArrowAndMenuWithTitle(
     title: String,
-    navController: NavHostController
+    navController: NavHostController,
+    modifier: Modifier = Modifier
 ){
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -77,7 +78,7 @@ fun ArrowAndMenuWithTitle(
 
         Row {
             Modifier.width(25.dp)
-            EditMainButtonPack()
+            EditMainButtonPack(navController = navController)
             DebugDropdown(navController = navController)
             ReturnToMainButton(navController)       //<<===디버그용===!!//
         }

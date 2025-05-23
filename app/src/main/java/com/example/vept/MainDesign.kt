@@ -70,20 +70,12 @@ import com.example.vept.ui.theme.HomeDownLoadButton
 import com.example.vept.ui.theme.TextColor
 
 
-
-
-
-
-
-
-
-
-
 @Composable
 fun Home(
     viewModel: MainDesignViewModel
 
 ){
+
 
 
     val context = LocalContext.current

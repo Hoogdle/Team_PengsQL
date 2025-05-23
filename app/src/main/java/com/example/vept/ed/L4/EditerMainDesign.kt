@@ -374,7 +374,7 @@ fun EditMainButton(
 
 
 @Composable
-fun EditMainButtonPack(){
+fun EditMainButtonPack(navController: NavHostController){
     Row (
         Modifier
             .padding(
@@ -385,7 +385,8 @@ fun EditMainButtonPack(){
             )
             .clip(RoundedCornerShape(8.dp,8.dp,0.dp,0.dp))
     ){
-        EditMainButton("버튼1", onClickFunction = {})
+        // 임시로 네비게이션 용으로 사용
+        EditMainButton("ai cli", onClickFunction = { navController.navigate("ai")})
         EditMainButton("버튼2", onClickFunction = {})
         EditMainButton("버튼3", onClickFunction = {})
     }
