@@ -23,6 +23,11 @@ object EditerComposableWrapper {
                 composable("main") {
                     EditerMainDesign(mainViewModel, navController)
                 }
+
+                // 임시로 ai navigator 생성
+                composable("ai"){
+                    EditMCPsDesign(navController)
+                }
                 composable("sql?name={name}&type={type}",
                     arguments = listOf(
                         navArgument("name") { type = NavType.StringType; defaultValue = "" },

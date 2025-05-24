@@ -1,5 +1,6 @@
 package com.example.vept
 
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 
 object ComposableWrapper {
@@ -7,6 +8,7 @@ object ComposableWrapper {
     fun setComposableContent(composeView: ComposeView, viewModel: MainDesignViewModel) {
         composeView.setContent {
             //MainDesign(viewModel)
+
             Home(viewModel)
         }
     }
