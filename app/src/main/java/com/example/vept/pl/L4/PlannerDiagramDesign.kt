@@ -1,5 +1,6 @@
 package com.example.vept.pl.L4
 
+import android.graphics.Matrix
 import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -31,7 +33,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.scale
+import androidx.compose.ui.graphics.withSave
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.TextStyle
@@ -39,6 +46,7 @@ import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
@@ -97,31 +105,22 @@ fun SelectDiagramTitle(
 fun DrawCanvas(viewModel: PlannerDiagramViewModel) {
     var scale by remember { mutableStateOf(1f) }
     var offset by remember { mutableStateOf(Offset.Zero) }
-    val state = rememberTransformableState { zoomChange, offsetChange, _ ->
-        scale *= zoomChange
-        offset += offsetChange * scale
-    }
     val mdiagrams = viewModel.dia
+    val medges = viewModel.edg
     val textMeasurer = rememberTextMeasurer()
     var moveInd: Int = -1;
     Canvas(
         modifier = Modifier
-            .graphicsLayer(
-                scaleX = scale,
-                scaleY = scale,
-                translationX = offset.x,
-                translationY = offset.y
-            )
             .fillMaxSize()
             .background(Color.White)
-            .transformable(state = state)
             .pointerInput(Unit) {
                 detectTapGestures(
-                    onLongPress = { offset ->
+                    onLongPress = { inoffset ->
                         run {
+                            val getoff: Offset = Offset((inoffset.x - offset.x) / scale,(inoffset.y - offset.y) / scale)
                             mdiagrams.forEachIndexed { index, dia ->
                                 run {
-                                    if (dia.hitTest(offset.x, offset.y, 1f / 1f.toDp().value)) {
+                                    if (dia.hitTest(getoff.x, getoff.y, 1f / 1f.toDp().value)) {
                                         viewModel.unselect()
                                         viewModel.selectDiagram(index)
                                         moveInd = index;
@@ -136,16 +135,25 @@ fun DrawCanvas(viewModel: PlannerDiagramViewModel) {
                     }
                 )
             }
+            .pointerInput(Unit) {
+                detectTransformGestures(
+                    onGesture = { centroid, pan, Zoom, _ ->
+                        val newScale = scale * Zoom
+                        val scaleChange = newScale / scale
+
+                        offset = (offset - centroid) * scaleChange + centroid + pan
+                        scale = newScale
+                    }
+                )
+            }
             .pointerInput("dragging") {
                 detectDragGesturesAfterLongPress(
                     onDrag = { change, dragAmount ->
                         change.consume()
 
-                        val sz: Int = mdiagrams.size - 1
-
                         if (moveInd != -1) {
                             val newOffset =
-                                Offset(mdiagrams[moveInd].x.dp.toPx(), mdiagrams[moveInd].y.dp.toPx()) + dragAmount
+                                Offset(mdiagrams[moveInd].x.dp.toPx(), mdiagrams[moveInd].y.dp.toPx()) + dragAmount / scale
                             viewModel.moveDiagram(moveInd, newOffset.x.toDp().value, newOffset.y.toDp().value)
                         }
                     },
@@ -155,46 +163,76 @@ fun DrawCanvas(viewModel: PlannerDiagramViewModel) {
                     }
                 )
             }
-            .onSizeChanged {
+    ) {
+        drawIntoCanvas { canvas ->
+            canvas.withSave {
+                canvas.translate(offset.x, offset.y)
+                canvas.scale(scale, scale)
 
-                //pointerOffset.value.SetOffset(Offset(it.width / 2f, it.height / 2f))
-            },
-        onDraw = {
-            mdiagrams.forEach { dia ->
-                if(dia.width == 0f)
-                    dia.calSize(textMeasurer, 1f / 1f.toDp().value)
-                if (dia.selected) {
-                    drawRect(
-                        color = Color.Cyan,
-                        topLeft = Offset((dia.x - 5).dp.toPx(), (dia.y - 5).dp.toPx()),
-                        size = Size(dia.width + 10f.dp.toPx(), dia.height + 10f.dp.toPx())
-                    )
-                }
                 val den: Float = 1f / 1f.toDp().value
-                val offX: Float = (dia.x + 5) * den
-                val offY: Float = dia.y + 21
-                val offYLine: Float = dia.y + 20
-                drawRect(
-                    color = ButtonColor,
-                    topLeft = Offset(dia.x * den, dia.y * den),
-                    size = Size(dia.width, dia.height)
-                )
-                drawRect(
-                    color = Color.White,
-                    topLeft = Offset((dia.x + 2) * den, (dia.y + 20) * den),
-                    size = Size(dia.width - 4 * den, dia.height - 22 * den)
-                )
-                drawText(textMeasurer, dia.name, topLeft = Offset(offX, (dia.y+1) * den), style = TextStyle(color = ButtonTextColor))
-                dia.fields.forEachIndexed { ind, li ->
-                    drawText(textMeasurer, li.name, topLeft = Offset(offX, (offY+ind*20) * den), style = TextStyle(color = Color.Black))
-                    drawText(textMeasurer, li.type, topLeft = Offset((dia.x - 5) * den + dia.width - textMeasurer.measure(li.type).size.width, (offY+ind*20) * den), style = TextStyle(color = Color.DarkGray))
-                    if(ind != 0)
-                        drawLine(color = Color.Gray,
-                            start = Offset((dia.x + 2) * den, (offYLine+ind*20) * den),
-                            end = Offset((dia.x - 2) * den + dia.width, (offYLine+ind*20) * den),
-                            strokeWidth = 2f)
+
+                clipRect(
+                    left = -offset.x / scale,
+                    top = -offset.y / scale,
+                    right = (size.width - offset.x) / scale,
+                    bottom = (size.height - offset.y) / scale
+                ) {
+                    mdiagrams.forEach { dia ->
+                        if(dia.width == 0f)
+                            dia.calSize(textMeasurer, 1f / 1f.toDp().value)
+                        if (dia.selected) {
+                            drawRect(
+                                color = Color.Cyan,
+                                topLeft = Offset((dia.x - 5).dp.toPx(), (dia.y - 5).dp.toPx()),
+                                size = Size(dia.width + 10f.dp.toPx(), dia.height + 10f.dp.toPx())
+                            )
+                        }
+                        val offX: Float = (dia.x + 5) * den
+                        val offY: Float = dia.y + 21
+                        val offYLine: Float = dia.y + 20
+                        drawRect(
+                            color = ButtonColor,
+                            topLeft = Offset(dia.x * den, dia.y * den),
+                            size = Size(dia.width, dia.height)
+                        )
+                        drawRect(
+                            color = Color.White,
+                            topLeft = Offset((dia.x + 2) * den, (dia.y + 20) * den),
+                            size = Size(dia.width - 4 * den, dia.height - 22 * den)
+                        )
+                        val meas = textMeasurer.measure(text = dia.name, style = TextStyle(color = ButtonTextColor), constraints = Constraints(maxWidth = Int.MAX_VALUE, maxHeight = Int.MAX_VALUE))
+                        drawText(meas, topLeft = Offset(offX, (dia.y+1) * den))
+                        dia.fields.forEachIndexed { ind, li ->
+                            var leftside = li.name;
+                            var rightside = li.type;
+                            if(li.pk)
+                                leftside += "(PK)"
+                            if(li.nn)
+                                rightside += "(NN)"
+                            val limeaso = textMeasurer.measure(text = leftside, style = TextStyle(color = Color.Black), constraints = Constraints(maxWidth = Int.MAX_VALUE, maxHeight = Int.MAX_VALUE))
+                            val limeast = textMeasurer.measure(text = rightside, style = TextStyle(color = Color.DarkGray), constraints = Constraints(maxWidth = Int.MAX_VALUE, maxHeight = Int.MAX_VALUE))
+                            drawText(limeaso, topLeft = Offset(offX, (offY+ind*20) * den))
+                            drawText(limeast, topLeft = Offset((dia.x - 5) * den + dia.width - textMeasurer.measure(rightside).size.width, (offY+ind*20) * den))
+                            if(ind != 0)
+                                drawLine(color = Color.Gray,
+                                    start = Offset((dia.x + 2) * den, (offYLine+ind*20) * den),
+                                    end = Offset((dia.x - 2) * den + dia.width, (offYLine+ind*20) * den),
+                                    strokeWidth = 2f)
+                        }
+                    }
+                    medges.forEach { sedg ->
+                        val lines: List<Offset> = sedg.getLine(den, mdiagrams)
+                        lines.windowed(2).forEach { (start, end) ->
+                            drawLine(
+                                color = ButtonColor,
+                                start = start,
+                                end = end,
+                                strokeWidth = 4f
+                            )
+                        }
+                    }
                 }
             }
         }
-    )
+    }
 }

@@ -8,7 +8,7 @@ import androidx.compose.ui.unit.dp
 import com.example.vept.R
 import org.w3c.dom.Text
 
-data class Field(val name: String, val type: String)
+data class Field(val name: String, val type: String, val pk: Boolean = false, val nn: Boolean = false, val df: Any = 0)
 
 data class Diagram(
     val name: String,
@@ -19,7 +19,6 @@ data class Diagram(
     var height: Float = 0f,
     val selected: Boolean = false
 ) {
-
     fun hitTest(testX: Float, testY: Float, den: Float): Boolean {
         return testX in x * den..(x * den + width) && testY in y * den..(y * den + height)
     }
@@ -33,7 +32,11 @@ data class Diagram(
         width = meas.measure(name).size.width.toFloat() + 10f * den
         height = 20f * (fields.count() + 1) * den
         for (i in fields) {
-            val tmp: Float = meas.measure(i.name).size.width.toFloat() + meas.measure(i.type).size.width.toFloat() + 30f * den
+            var leftside = i.name;
+            var rightside = i.type;
+            if(i.pk) leftside += "(PK)"
+            if(i.nn) rightside += "(NN)"
+            val tmp: Float = meas.measure(leftside).size.width.toFloat() + meas.measure(rightside).size.width.toFloat() + 30f * den
             if(tmp > width) width = tmp;
         }
     }
