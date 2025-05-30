@@ -237,7 +237,7 @@ fun EditMCPsUserTurn(
                 modifier = Modifier
                     .padding(15.dp),
                 style = TextStyle(
-                    color = TextColor,
+                    color = Color.White,
                     fontFamily = FontFamily(Font(R.font.pretendard_regular)),
                     fontSize = 14.sp
                 ),
