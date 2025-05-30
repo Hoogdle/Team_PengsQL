@@ -1,9 +1,11 @@
 package com.example.vept.ui.other
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
@@ -24,7 +26,10 @@ import com.example.vept.ed.L4.ReturnToMainButton
 import com.example.vept.ed.L4.SelectDBTitle
 
 @Composable
-fun ArrowAndMenu(){
+fun ArrowAndMenu(
+    navController: NavHostController,
+    destination: String = ""
+){
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -37,6 +42,7 @@ fun ArrowAndMenu(){
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Icon(
+            modifier = Modifier.size(25.dp).clickable { if(destination != "") navController.navigate(destination)},
             painter = painterResource(R.drawable.arrow_back),
             tint = Color.Black,
             contentDescription = "",
@@ -53,7 +59,8 @@ fun ArrowAndMenu(){
 fun ArrowAndMenuWithTitle(
     title: String,
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    destination: String = ""
 ){
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -68,11 +75,11 @@ fun ArrowAndMenuWithTitle(
     ) {
         Row {
             Icon(
+                modifier = Modifier.size(25.dp).clickable { if(destination != "") navController.navigate(destination)},
                 painter = painterResource(R.drawable.arrow_back),
                 tint = Color.Black,
                 contentDescription = "",
             )
-            Modifier.width(10.dp)
             SelectDBTitle(title)
         }
 
@@ -91,6 +98,7 @@ fun ArrowAndMenuCLI(
     navController: NavHostController,
     viewModel: EditSqlCliViewModel,
     textState: MutableList<MutableState<String>>,
+    destination: String
 ){
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -105,6 +113,7 @@ fun ArrowAndMenuCLI(
     ) {
         Row {
             Icon(
+                modifier = Modifier.size(25.dp).clickable { if(destination != "") navController.navigate(destination)},
                 painter = painterResource(R.drawable.arrow_back),
                 tint = Color.Black,
                 contentDescription = "",

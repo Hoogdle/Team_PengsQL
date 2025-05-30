@@ -55,7 +55,7 @@ import com.example.vept.ui.theme.TitleColor
 import kotlin.math.round
 
 @Composable
-fun MainDesign(
+fun Diagram(
     viewModel: PlannerDiagramViewModel
 ){
     Column(
@@ -63,7 +63,7 @@ fun MainDesign(
             .background(BackGroundColor)
             .padding(top = 25.dp)
     ) {
-        ArrowAndMenu()
+//        ArrowAndMenu()
         Spacer(modifier = Modifier.height(15.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),

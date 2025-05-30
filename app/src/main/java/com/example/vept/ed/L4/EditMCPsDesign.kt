@@ -91,7 +91,7 @@ fun EditMCPsDesign(
                 .background(BackGroundColor)
                 .padding(top = 25.dp)
         ){
-            ArrowAndMenuWithTitle("", navController, Modifier.padding(inner))
+            ArrowAndMenuWithTitle("", navController, Modifier.padding(inner), destination = "main")
 
             EditMCPsTemplate(
                 modifier = Modifier.padding(inner),

@@ -73,7 +73,6 @@ import com.example.vept.ui.theme.TextColor
 @Composable
 fun Home(
     viewModel: MainDesignViewModel
-
 ){
 
 
@@ -111,9 +110,10 @@ fun Home(
                 HomeButton(
                     contents = "다이어그램 생성",
                     onClick = {
+                        
+                        //Todo, 다이어그램 네비게이션 연결
                         val intent = Intent(context, PlannerMain::class.java)
                         context.startActivity(intent)
-
                     }
                 )
                 Spacer(Modifier.height(25.dp))

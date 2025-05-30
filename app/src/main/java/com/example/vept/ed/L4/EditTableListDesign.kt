@@ -126,7 +126,7 @@ fun EditTableListDesign(
             .background(BackGroundColor)
             .padding(top = 25.dp)
     ){
-        ArrowAndMenuWithTitle(TableName,navController)
+        ArrowAndMenuWithTitle(TableName,navController, destination = "main")
 
         DBTable(
             viewModel = viewModel,

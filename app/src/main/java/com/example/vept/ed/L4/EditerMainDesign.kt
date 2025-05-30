@@ -73,7 +73,7 @@ fun EditerMainDesign(
             .padding(top = 25.dp)
     ) {
 
-        ArrowAndMenuWithTitle(databaseName,navController)
+        ArrowAndMenuWithTitle(databaseName,navController, destination = "home")
 //        Row(
 //            modifier = Modifier.fillMaxWidth(),
 //            horizontalArrangement = Arrangement.SpaceBetween

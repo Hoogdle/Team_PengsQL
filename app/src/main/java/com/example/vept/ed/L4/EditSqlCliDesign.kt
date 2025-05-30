@@ -171,6 +171,7 @@ fun EditSqlCliDesign(
                 navController = navController,
                 viewModel = viewModel,
                 textState = userInputs,
+                destination = "main"
             )
             Column(
                 modifier = Modifier
