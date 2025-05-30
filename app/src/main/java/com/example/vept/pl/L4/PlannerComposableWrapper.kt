@@ -7,7 +7,7 @@ object PlannerComposableWrapper {
     @JvmStatic
     fun setComposableContent(composeView: ComposeView, viewModel: PlannerDiagramViewModel) {
         composeView.setContent {
-            Diagram(viewModel)
+            MainDesign(viewModel)
         }
     }
 }

@@ -10,6 +10,7 @@ import androidx.navigation.navArgument
 import com.example.vept.Home
 import com.example.vept.MainDesignViewModel
 import com.example.vept.pl.L4.Diagram
+import com.example.vept.pl.L4.MainDesign
 import com.example.vept.pl.L4.PlannerDiagramViewModel
 
 object EditerComposableWrapper {
@@ -31,7 +32,7 @@ object EditerComposableWrapper {
                 }
 
                 composable("diagram"){
-                    Diagram(diagramViewModel)
+                    MainDesign(diagramViewModel)
                 }
                 composable("home"){
                     Home(viewModel = homeViewModel)
