@@ -77,7 +77,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.vept.R
-import com.example.vept.ui.other.ArrowAndMenu
 import com.example.vept.ui.theme.BackGroundColor
 import com.example.vept.ui.theme.ButtonColor
 import com.example.vept.ui.theme.ButtonTextColor

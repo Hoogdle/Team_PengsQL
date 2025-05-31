@@ -1,6 +1,7 @@
 package com.example.vept.ed.L4
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -42,6 +43,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -54,7 +56,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import androidx.navigation.NavHostController
 import com.example.vept.R
+import com.example.vept.ui.other.ArrowAndMenuCLI
 import com.example.vept.ui.other.ArrowAndMenuWithTitle
+import com.example.vept.ui.other.ArrowAndTitle
 import com.example.vept.ui.theme.AiBackGround
 import com.example.vept.ui.theme.AiTextBox
 import com.example.vept.ui.theme.BackGroundColor
@@ -63,6 +67,9 @@ import com.example.vept.ui.theme.HomeDBListColor
 import com.example.vept.ui.theme.TableBackGroundColor
 import com.example.vept.ui.theme.TextColor
 import com.example.vept.ui.theme.UserTextBox
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 @Composable
 fun EditMCPsDesign(
@@ -73,6 +80,7 @@ fun EditMCPsDesign(
 //    val storedInfo = remember { mutableStateListOf("안녕하세요. PengSQL AI assistant 입니다. 무엇을 도와드릴까요?","피카츄랑 리자몽이랑 싸우면 과연 누가 이길까? 물론 피카츄가 몸집은 리장몽에 비해 매우 작지만..", "저는 리자몽이 이길 것이라 생각해요. 리자몽은 불 타입이고 피카츄는 번개 타입인데....", "아니 그래도 피카츄가 이길 수도 있지 않을까? 리자몽은 몸이 크니깐 둔할 거고, 이런 약점을 민첩한 피카츄가 잘 이용한다면...","아니 그래도 피카츄가 이길 수도 있지 않을까? 리자몽은 몸이 크니깐 둔할 거고, 이런 약점을 민첩한 피카츄가 잘 이용한다면...","아니 그래도 피카츄가 이길 수도 있지 않을까? 리자몽은 몸이 크니깐 둔할 거고, 이런 약점을 민첩한 피카츄가 잘 이용한다면...","아니 그래도 피카츄가 이길 수도 있지 않을까? 리자몽은 몸이 크니깐 둔할 거고, 이런 약점을 민첩한 피카츄가 잘 이용한다면...","아니 그래도 피카츄가 이길 수도 있지 않을까? 리자몽은 몸이 크니깐 둔할 거고, 이런 약점을 민첩한 피카츄가 잘 이용한다면...","아니 그래도 피카츄가 이길 수도 있지 않을까? 리자몽은 몸이 크니깐 둔할 거고, 이런 약점을 민첩한 피카츄가 잘 이용한다면...") }
 
     val storedInfo = remember { mutableStateListOf("안녕하세요. PengSQL AI assistant 입니다. 무엇을 도와드릴까요?") }
+    val isButtonOn = remember { mutableStateOf(true) }
     Log.e("zxc",storedInfo.size.toString())
     Log.e("zxc",storedInfo[storedInfo.size-1])
 
@@ -81,7 +89,8 @@ fun EditMCPsDesign(
         bottomBar = {
             EditMCPsTextField(
                 count = count,
-                storedInfo = storedInfo
+                storedInfo = storedInfo,
+                isButtonOn = isButtonOn
             )
         }
     ) { inner ->
@@ -91,7 +100,7 @@ fun EditMCPsDesign(
                 .background(BackGroundColor)
                 .padding(top = 25.dp)
         ){
-            ArrowAndMenuWithTitle("", navController, Modifier.padding(inner), destination = "main")
+            ArrowAndTitle(navController =  navController, title = "PengSAI", destination = "main")
 
             EditMCPsTemplate(
                 modifier = Modifier.padding(inner),
@@ -252,7 +261,8 @@ fun EditMCPsUserTurn(
 @Composable
 fun EditMCPsTextField(
     count: MutableState<Int>,
-    storedInfo: MutableList<String>
+    storedInfo: MutableList<String>,
+    isButtonOn: MutableState<Boolean>
 ){
     val input = remember { mutableStateOf("") }
     val interactionSource = remember { MutableInteractionSource() }
@@ -260,6 +270,8 @@ fun EditMCPsTextField(
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier.fillMaxWidth()
     ){
+        val context = LocalContext.current
+
         BasicTextField(
             // 필터 입력 후 Action에 대해 정의
             keyboardOptions = KeyboardOptions(
@@ -366,11 +378,27 @@ fun EditMCPsTextField(
                 disabledContainerColor = ButtonColor
             ),
             onClick = {
-                Log.e("zxc",input.value)
-                storedInfo.add(input.value)
+                if(isButtonOn.value == true){
+                    val tmpStore = input.value
+                    isButtonOn.value = false
+                    Log.e("zxc",input.value)
+                    storedInfo.add(input.value)
+                    storedInfo.add("요청 처리 중 입니다..") // 임시적으로, 디자인 테스트를 위해 2개를 add한 것. 원래는 유저 추가 후 AI 의 답변을 기다린 후 추가
 
-                storedInfo.add("AI의 새로운 답변") // 임시적으로, 디자인 테스트를 위해 2개를 add한 것. 원래는 유저 추가 후 AI 의 답변을 기다린 후 추가
-                input.value = ""
+                    Log.e("catch", input.value)
+                    runBlocking {
+                        val job = GlobalScope.launch {
+                            storedInfo[storedInfo.size-1] = AiServer(
+                                prompt = tmpStore,
+                                db = ""
+                            ).toString()
+                        }
+                    }
+                    input.value = ""
+                    isButtonOn.value = true
+                } else {
+                    Toast.makeText(context, "AI가 요청을 처리하고 있습니다. 잠시만 기다려 주세요.", Toast.LENGTH_SHORT).show()
+                }
             }
         ) {
             Image(

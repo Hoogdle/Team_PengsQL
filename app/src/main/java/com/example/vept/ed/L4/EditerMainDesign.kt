@@ -46,7 +46,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import com.example.vept.ui.other.ArrowAndMenu
 import com.example.vept.R
 import com.example.vept.ui.other.ArrowAndMenuWithTitle
 import com.example.vept.ui.theme.BackGroundColor
@@ -386,9 +385,9 @@ fun EditMainButtonPack(navController: NavHostController){
             .clip(RoundedCornerShape(8.dp,8.dp,0.dp,0.dp))
     ){
         // 임시로 네비게이션 용으로 사용
-        EditMainButton("ai cli", onClickFunction = { navController.navigate("ai")})
-        EditMainButton("버튼2", onClickFunction = {})
-        EditMainButton("버튼3", onClickFunction = {})
+        EditMainButton("CLI", onClickFunction = { navController.navigate("sql")})
+        EditMainButton("Table Mode", onClickFunction = {  navController.navigate("mod?name=&type=테이블")})
+        EditMainButton("Save", onClickFunction = { /* Save Action 정의 필요*/})
     }
 }
 

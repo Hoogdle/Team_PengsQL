@@ -1,18 +1,25 @@
 package com.example.vept.ui.other
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -25,9 +32,11 @@ import com.example.vept.ed.L4.EditSqlCliViewModel
 import com.example.vept.ed.L4.ReturnToMainButton
 import com.example.vept.ed.L4.SelectDBTitle
 
+// 단일 화살표
 @Composable
-fun ArrowAndMenu(
+fun ArrowAndTitle(
     navController: NavHostController,
+    title: String = "",
     destination: String = ""
 ){
     Row(
@@ -39,7 +48,6 @@ fun ArrowAndMenu(
                 end = 40.dp,
                 bottom = 5.dp
             ),
-        horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Icon(
             modifier = Modifier.size(25.dp).clickable { if(destination != "") navController.navigate(destination)},
@@ -47,11 +55,7 @@ fun ArrowAndMenu(
             tint = Color.Black,
             contentDescription = "",
         )
-        Icon(
-            painter = painterResource(R.drawable.menu),
-            tint = Color.Black,
-            contentDescription = "",
-        )
+        SelectDBTitle(title)
     }
 }
 
@@ -86,8 +90,29 @@ fun ArrowAndMenuWithTitle(
         Row {
             Modifier.width(25.dp)
             EditMainButtonPack(navController = navController)
-            DebugDropdown(navController = navController)
-            ReturnToMainButton(navController)       //<<===디버그용===!!//
+            Button(
+                modifier = Modifier
+                    .width(35.dp)
+                    .height(35.dp)
+                    .offset()
+                ,
+                contentPadding = PaddingValues(0.dp),
+                colors = ButtonColors(
+                    contentColor = Color.Transparent,
+                    containerColor = Color.Transparent,
+                    disabledContentColor = Color.Transparent,
+                    disabledContainerColor = Color.Transparent
+                ),
+                onClick = {
+                    navController.navigate("ai")
+                }
+            ) {
+                Image(
+                    contentScale = ContentScale.FillBounds,
+                    painter = painterResource(R.drawable.gemma),
+                    contentDescription = ""
+                )
+            }
         }
     }
 }

@@ -68,7 +68,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.vept.R
 
-import com.example.vept.ui.other.ArrowAndMenu
 import com.example.vept.ui.theme.BackGroundColor
 import com.example.vept.ui.theme.TableBackGroundColor
 import com.example.vept.ui.theme.TitleColor
@@ -104,7 +103,9 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import com.example.vept.ui.other.ArrowAndMenuCLI
 import com.example.vept.ui.other.ArrowAndMenuWithTitle
+import com.example.vept.ui.other.ArrowAndTitle
 import com.example.vept.ui.theme.TextColor
 
 
@@ -126,7 +127,7 @@ fun EditTableListDesign(
             .background(BackGroundColor)
             .padding(top = 25.dp)
     ){
-        ArrowAndMenuWithTitle(TableName,navController, destination = "main")
+        ArrowAndTitle(navController = navController, title = TableName, destination = "main")
 
         DBTable(
             viewModel = viewModel,
