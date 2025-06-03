@@ -1,6 +1,8 @@
 package com.example.vept.ed.L4
 
 import android.util.Log
+import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.compose.foundation.layout.*
@@ -13,16 +15,34 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.example.vept.R
+import com.example.vept.ui.theme.BackGroundColor
+import com.example.vept.ui.theme.ButtonColor
+import com.example.vept.ui.theme.ButtonTextColor
+import com.example.vept.ui.theme.HomeBackGround
+import com.example.vept.ui.theme.TableBackGroundColor
+import com.example.vept.ui.theme.TextColor
 
 
 /*
@@ -54,6 +74,7 @@ data class Field(
     val defaultValue: String? = null,
     val isReferenced: Boolean = false
 )
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditTableModNewDesign(
     viewModel: EditTableModViewModel,
@@ -69,22 +90,166 @@ fun EditTableModNewDesign(
     var showEditDialog by remember { mutableStateOf(false) }
     var editingFieldIndex by remember { mutableStateOf(-1) }
     var editingField by remember { mutableStateOf<Field?>(null) }
+    val interactionSource = remember { MutableInteractionSource() }
 
-    Column(modifier = Modifier.padding(16.dp)) {
-        Text("새 테이블 생성", fontSize = 20.sp)
 
-        OutlinedTextField(
-            value = tableName,
-            onValueChange = { tableName = it },
-            label = { Text("테이블 이름") },
-            modifier = Modifier.fillMaxWidth()
-        )
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(TableBackGroundColor)
+    ) {
+//        Text(
+//            textAlign = TextAlign.Center,
+//            modifier = Modifier,
+//            text = "새 테이블 생성",
+//            style = TextStyle(
+//                color = TextColor,
+//                fontFamily = FontFamily(Font(R.font.pretendard_bold)),
+//                fontSize = 16.sp
+//            )
+//        )
+
+        Row (
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .padding(
+                    top = 15.dp
+                )
+                .fillMaxWidth()
+        ){
+            BasicTextField(
+                // 필터 입력 후 Action에 대해 정의
+
+                value = tableName,
+                onValueChange = {
+                    tableName = it
+                },
+                modifier = Modifier
+                    .weight(7f)
+                    .padding(
+                        start = 10.dp,
+                        end = 10.dp
+                    )
+                    .clip(RoundedCornerShape(15.dp))
+                    .background(
+                        color = Color.Transparent
+                    )
+                    .height(60.dp),
+                singleLine = true,
+                textStyle = TextStyle(
+                    color = TextColor,
+                    fontFamily = FontFamily(Font(R.font.pretendard_regular)),
+                    fontSize = 15.sp
+                ),
+
+                decorationBox = @Composable { innerTextField ->
+                    TextFieldDefaults.DecorationBox(
+                        placeholder = {
+                            Text(
+                                text = "새 테이블 이름",
+                                color = TextColor,
+                                style = TextStyle(
+                                    color = TextColor,
+                                    fontFamily = FontFamily(Font(R.font.pretendard_regular)),
+                                    fontSize = 15.sp
+                                ),
+                            )
+                        },
+                        singleLine = true,
+                        visualTransformation = VisualTransformation.None,
+                        enabled = true,
+                        innerTextField = innerTextField,
+                        value = tableName.toString(),
+                        interactionSource = interactionSource,
+                        colors = TextFieldDefaults.colors(
+                            focusedTextColor = TextColor,
+                            unfocusedTextColor = TextColor,
+                            focusedIndicatorColor = HomeBackGround,
+                            unfocusedIndicatorColor = HomeBackGround,
+                            cursorColor = TextColor,
+                            unfocusedContainerColor = HomeBackGround,
+                            focusedContainerColor = HomeBackGround,
+                            errorContainerColor = HomeBackGround,
+                            disabledContainerColor = HomeBackGround
+                        ),
+                    )
+                }
+            )
+
+
+            Button(
+                colors = ButtonColors(
+                    contentColor = ButtonColor,
+                    containerColor = ButtonColor,
+                    disabledContentColor = ButtonColor,
+                    disabledContainerColor = ButtonColor
+                ),
+                shape = RoundedCornerShape(15.dp),
+                onClick = { showDialog = true },
+                modifier = Modifier
+                    .height(50.dp)
+                    .weight(1.5f)
+                    .padding(
+                        start = 10.dp,
+                        end = 10.dp,
+                        top = 6.dp
+
+                    )
+            ) {
+                Text(
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier,
+                    text = "추가",
+                    style = TextStyle(
+                        color = ButtonTextColor,
+                        fontFamily = FontFamily(Font(R.font.pretendard_bold)),
+                        fontSize = 15.sp
+                    )
+                )
+            }
+            Button(
+                colors = ButtonColors(
+                    contentColor = ButtonColor,
+                    containerColor = ButtonColor,
+                    disabledContentColor = ButtonColor,
+                    disabledContainerColor = ButtonColor
+                ),
+                shape = RoundedCornerShape(15.dp),
+                modifier = Modifier
+                    .height(50.dp)
+                    .weight(1.5f)
+                    .padding(
+                        start = 10.dp,
+                        end = 10.dp,
+                        top = 5.dp
+                    )
+                ,
+                onClick = {
+                    generatedSql = generateCreateTableQuery(tableName, fields)
+                    showSqlDialog = true
+                },
+                enabled = tableName.isNotBlank() && fields.isNotEmpty(),
+
+                ) {
+                Text(
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier,
+                    text = "적용",
+                    style = TextStyle(
+                        color = ButtonTextColor,
+                        fontFamily = FontFamily(Font(R.font.pretendard_bold)),
+                        fontSize = 15.sp
+                    )
+                )
+            }
+        }
+
+
+
 
         Spacer(Modifier.height(8.dp))
 
-        Button(onClick = { showDialog = true }) {
-            Text("➕ 필드 추가")
-        }
+
 
         Spacer(Modifier.height(8.dp))
 
@@ -97,10 +262,24 @@ fun EditTableModNewDesign(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 4.dp)
+                        .padding(
+                            start = 25.dp,
+                            end = 25.dp,
+                            bottom = 10.dp
+                        )
+                        .background(Color.White)
+                        .shadow(
+                            elevation = 4.dp,
+                            shape = RoundedCornerShape(15.dp)
+                        )
+
                 ) {
                     Row(
-                        modifier = Modifier.padding(8.dp),
+                        modifier = Modifier
+
+                            .background(Color.White)
+                            .padding(15.dp)
+                        ,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text("${field.name} (${field.type})", modifier = Modifier.weight(1f))
@@ -123,16 +302,7 @@ fun EditTableModNewDesign(
 
         Spacer(Modifier.height(16.dp))
 
-        Button(
-            onClick = {
-                generatedSql = generateCreateTableQuery(tableName, fields)
-                showSqlDialog = true
-            },
-            enabled = tableName.isNotBlank() && fields.isNotEmpty(),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("적용하기")
-        }
+
     }
 
     if (showDialog) {

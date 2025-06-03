@@ -7,6 +7,8 @@
 
 
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="true"
@@ -17,8 +19,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.VEPT"
+        android:windowSoftInputMode="adjustPan"
         tools:targetApi="31">
         <activity
+            android:windowSoftInputMode="adjustResize|stateVisible"
             android:name=".MainActivity"
             android:screenOrientation="landscape"
             android:exported="true"
@@ -33,11 +37,15 @@
 
 
         <activity
+            android:windowSoftInputMode="adjustResize|stateVisible"
             android:name=".ed.L4.EditerMain"
+            android:screenOrientation="landscape"
             android:exported="false"
             android:theme="@style/Theme.VEPT" />
         <activity
+            android:windowSoftInputMode="adjustResize|stateVisible"
             android:name=".pl.L4.PlannerMain"
+            android:screenOrientation="landscape"
             android:exported="false"
             android:theme="@style/Theme.VEPT" />
 

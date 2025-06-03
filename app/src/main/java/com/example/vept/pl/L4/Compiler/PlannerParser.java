@@ -1,7 +1,6 @@
 package com.example.vept.pl.L4.Compiler;
 
 import android.renderscript.Int4;
-import android.util.Log;
 
 import com.example.vept.pl.L4.Field;
 import com.example.vept.pl.L4.PlannerDiagramViewModel;
@@ -18,7 +17,6 @@ public class PlannerParser {
     private boolean isError;
     private final PlannerLexer Lex;
     private LexerStruct LastToken;
-    private LexerStruct PreToken;
     private String CurrTable;
     private String CurrField;
     private String[] RecoveryTexts = {
@@ -36,6 +34,7 @@ public class PlannerParser {
     private boolean isexpk;
     private boolean isNN;
     private boolean isDF;
+    private boolean isUQ;
     private boolean isfkey;
     public PlannerParser(PlannerDiagramViewModel viewModel, PlannerLexer Lex) {
         this.Lex = Lex;
@@ -69,7 +68,8 @@ public class PlannerParser {
     private void ShowError() {
         isError = true;
         if(isAlive) {
-            Log.d("E", "Error! : " + Lex.GetLine());
+            viewModel.adderror(Lex.GetLine() - 1);
+            //Log.d("E", "Error! : " + Lex.GetLine());
         }
 
         isAlive = false;
@@ -80,7 +80,13 @@ public class PlannerParser {
     }
 
     private void ShowRunError(String msg) {
-        Log.d("E", "RunTimeError! : " + msg);
+        viewModel.adderror(2);
+    }
+
+    private void ShowRefError(int Line) {
+        viewModel.adderror(Line - 1);
+        //Log.d("E", "Error! : " + Line);
+        isError = true;
     }
 
     public void Start() {
@@ -150,10 +156,6 @@ public class PlannerParser {
             }
         }
     }
-    private void ShowRefError(int Line) {
-        Log.d("E", "Error! : " + Line);
-        isError = true;
-    }
     public void Recover() {
         if(LastToken.Text.equals("table")) {
             RecoverPoint = LastToken.Text;
@@ -180,7 +182,6 @@ public class PlannerParser {
                     TableList.put(CurrTable, tmp);
                     TableNameList.add(CurrTable);
                     isexpk = false;
-                    Log.d("D", "Make Table! : " + CurrTable);
                 }
                 match("{");
             }
@@ -209,7 +210,8 @@ public class PlannerParser {
                     tmp.Fields.put(CurrField, options);
                     isfkey = false;
                     isNN = false;
-                    Log.d("D", "Make Field! : " + CurrTable + ":(" + CurrType + ")" + CurrField);
+                    isDF = false;
+                    isUQ = false;
                 } else {
                     ShowError();
                 }
@@ -243,7 +245,6 @@ public class PlannerParser {
             tmp.FromField = CurrField;
             tmp.ToField = preFd;
             tmp.CodeLine = Lex.GetLine();
-            Log.d("D", "Make FJ! : " + CurrTable + ":" + CurrField + "-" + preTb + ":" + preFd);
             FKeyList.add(tmp);
             if(isAlive) isfkey = true;
             match(")");
@@ -281,6 +282,7 @@ public class PlannerParser {
         }
     }
     private void Const() {
+        String preToken;
         if(LastToken.Text.equals("PK")) {
             if(!isexpk && !isfkey) {
                 isexpk = true;
@@ -290,10 +292,25 @@ public class PlannerParser {
                 ShowError();
             }
         } else if(LastToken.Text.equals("NN")) {
-            if(!isNN && !isfkey) {
+            if(!isNN) {
                 isNN = true;
                 match("NN");
                 SetConst("NN", "1");
+            }
+        } else if(LastToken.Text.equals("DF")) {
+            if(!isDF && !isfkey) {
+                isDF = true;
+                match("DF");
+                match("=");
+                preToken = LastToken.Text;
+                matchtype(TokenType.LITE);
+                SetConst("DF", preToken);
+            }
+        } else if(LastToken.Text.equals("UQ")) {
+            if(!isUQ && !isfkey) {
+                isUQ = true;
+                match("UQ");
+                SetConst("UQ", "1");
             }
         } else {
             ShowError();
@@ -305,7 +322,6 @@ public class PlannerParser {
             DiagramMessage tmp = TableList.get(CurrTable);
             if(tmp != null && tmp.Fields.containsKey(CurrField)) {
                 tmp.Fields.get(CurrField).put(con, value);
-                Log.d("D", "Set Const!(" + con + ") : " + CurrTable + ":" + CurrField);
             } else {
                 ShowError();
             }
@@ -315,8 +331,5 @@ public class PlannerParser {
     }
     private void Id() {
         matchtype(TokenType.ID);
-    }
-    private void Numb() {
-        matchtype(TokenType.LITE);
     }
 }

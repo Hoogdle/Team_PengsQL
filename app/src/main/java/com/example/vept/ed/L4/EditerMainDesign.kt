@@ -1,13 +1,18 @@
 package com.example.vept.ed.L4
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,6 +22,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -32,16 +39,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import com.example.vept.ui.other.ArrowAndMenu
 import com.example.vept.R
+import com.example.vept.sysops.L1.FileExplorer
+import com.example.vept.ui.other.ArrowAndMenuWithTitle
 import com.example.vept.ui.theme.BackGroundColor
+import com.example.vept.ui.theme.ButtonColor
+import com.example.vept.ui.theme.ButtonTextColor
 import com.example.vept.ui.theme.TableBackGroundColor
 import com.example.vept.ui.theme.TextColor
 import com.example.vept.ui.theme.TitleColor
@@ -62,16 +76,14 @@ fun EditerMainDesign(
             .background(BackGroundColor)
             .padding(top = 25.dp)
     ) {
-        ArrowAndMenu()
-        Spacer(modifier = Modifier.height(15.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            SelectDBTitle(databaseName)
-            DebugDropdown(navController = navController)
-            SelectDBButtonPack()
-        }
+
+        ArrowAndMenuWithTitle(databaseName,navController, destination = "home")
+//        Row(
+//            modifier = Modifier.fillMaxWidth(),
+//            horizontalArrangement = Arrangement.SpaceBetween
+//        ) {
+//            SelectDBButtonPack()
+//        }
         SelectDBTemplate(viewModel, navController)
     }
 }
@@ -82,10 +94,14 @@ fun EditerMainDesign(
 fun SelectDBTitle(
     text: String
 ){
-    Column {
+    Column{
         Text(
             modifier = Modifier
-                .padding(start = 45.dp),
+                .padding(start = 45.dp)
+                .offset(
+                    y = -6.dp
+                )
+            ,
             text = text,
             style = TextStyle(
                 color = TitleColor,
@@ -101,6 +117,10 @@ fun SelectDBTitle(
 @Composable
 fun TextHeader(headName: String, size: Int) {
     Text(
+        modifier = Modifier
+            .padding(
+                top = 7.dp
+            ),
         text = "$headName ($size)",
         style = TextStyle(
             color = TextColor,
@@ -141,12 +161,19 @@ fun SelectDBTemplate(
 
     Row(
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxWidth()
+            .fillMaxHeight()
+            .background(BackGroundColor)
+            .clip(shape = RoundedCornerShape(35.dp, 35.dp, 0.dp, 0.dp))
             .background(TableBackGroundColor)
+            .padding(
+                start = 30.dp,
+                end = 30.dp,
+            )
             .verticalScroll(verticalScrollState)
-            .padding(horizontal = 30.dp)
     ) {
         Column {
+
             listOf("테이블", "인덱스", "뷰", "트리거").forEach { section ->
                 val items = when (section) {
                     "테이블" -> tableMap
@@ -180,12 +207,26 @@ fun SectionWithHeaderAndItems(
 
     Column {
         Row(
-            Modifier
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
                 .clickable { expandedMap[headerName] = !isSectionExpanded }
                 .padding(vertical = 8.dp)
         ) {
             if (shouldExpand) {
+
                 Icon(
+                    modifier = Modifier
+                        .padding(
+                            top = 2.dp
+                        )
+                        .padding(
+                            start = if(isSectionExpanded) 0.dp else 10.dp,
+                            top = if(isSectionExpanded) 0.dp else 3.dp,
+                        )
+                        .offset(
+                            x = if(isSectionExpanded) 0.dp else -5.dp
+                        )
+                    ,
                     painter = painterResource(
                         if (isSectionExpanded) R.drawable.small_down else R.drawable.right_arrow
                     ),
@@ -239,11 +280,17 @@ fun SelectTableItem(
 
     Column {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Spacer(Modifier.width(40.dp))
+            Spacer(Modifier
+                .width( if(isExpanded) 30.dp else 40.dp)
+            )
 
             if (relatedList.isNotEmpty()) {
                 Icon(
-                    modifier = Modifier.clickable { onExpandToggle() },
+                    modifier = Modifier
+                        .offset(
+                            x = if(isExpanded) 4.dp else 0.dp
+                        )
+                        .clickable { onExpandToggle() },
                     painter = painterResource(
                         if (isExpanded) R.drawable.small_down else R.drawable.right_arrow
                     ),
@@ -291,35 +338,73 @@ fun SelectTableItem(
 }
 
 @Composable
-fun SelectDBButtonPack(){
+fun EditMainButton(
+    text: String,
+    navController: NavController? = null,
+    navDestination: String? = null,
+    onClickFunction: () -> Unit
+){
+    Button(
+        contentPadding = PaddingValues(7.dp),
+        modifier = Modifier
+            .height(30.dp)
+            .padding(
+                start = 1.dp,
+                end = 1.dp
+            )
+        ,
+        onClick = {
+            onClickFunction()
+        },
+        colors = ButtonColors(
+            contentColor = ButtonTextColor,
+            containerColor = ButtonColor,
+            disabledContainerColor = ButtonColor,
+            disabledContentColor = ButtonTextColor
+        ),
+        shape = RectangleShape
+    ) {
+        Text(
+            textAlign = TextAlign.Center,
+            text = text,
+            style = TextStyle(
+                color = ButtonTextColor,
+                fontFamily = FontFamily(Font(R.font.pretendard_bold)),
+                fontSize = 15.sp
+            )
+        )
+    }
+}
+
+
+@Composable
+fun EditMainButtonPack(databaseName : String, navController: NavHostController){
+    val context = LocalContext.current
+    val exportLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/octet-stream"),
+        onResult = { uri: Uri? ->
+            if (uri != null) {
+                FileExplorer.writeInternalDBToUri(context, databaseName, uri)
+            }
+        }
+    )
+
     Row (
         Modifier
             .padding(
                 end = 15.dp
             )
             .offset(
-                x = -50.dp,
-                y=3.dp
+                y = 16.dp
             )
             .clip(RoundedCornerShape(8.dp,8.dp,0.dp,0.dp))
     ){
-        /*
-        SelectDBButton(
-            "테이블 생성",
-            navController = TODO()
-        )
-        SelectDBButton(
-            "인덱스 생성",
-            navController = TODO()
-        )
-        SelectDBButton(
-            "저장",
-            navController = TODO()
-        )
-        SelectDBButton(
-            "취소",
-            navController = TODO()
-        )*/
+        // 임시로 네비게이션 용으로 사용
+        EditMainButton("CLI", onClickFunction = { navController.navigate("sql")})
+        EditMainButton("Table Mode", onClickFunction = {  navController.navigate("mod?name=&type=테이블")})
+        EditMainButton("Save", onClickFunction = {exportLauncher.launch("$databaseName")})
     }
 }
+
+
 

@@ -1,11 +1,14 @@
 package com.example.vept.sysops.L1;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+
+import androidx.core.util.Pair;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -70,6 +73,22 @@ public class SysOpsDB extends SQLiteOpenHelper {
         }
     }
 
+
+    @Override
+    public SQLiteDatabase getWritableDatabase() {
+        if (db == null || !db.isOpen()) {
+            openDatabase();
+        }
+        return db;
+    }
+
+    @Override
+    public SQLiteDatabase getReadableDatabase() {
+        return getWritableDatabase();
+    }
+
+
+
     public List<String> getDatabaseNames() {
         List<String> databaseNames = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();  // 읽기 모드 DB
@@ -104,7 +123,6 @@ public class SysOpsDB extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        // databases_info 테이블 생성
         db.execSQL("CREATE TABLE IF NOT EXISTS databases_info (" +
                 "database_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "database_name TEXT NOT NULL UNIQUE, " +
@@ -142,6 +160,56 @@ public class SysOpsDB extends SQLiteOpenHelper {
     }
 
 
+    void createDatabaseInfoToDB(String databaseName, String originalPath, String interiorPath) {
+        Log.d("DBPathCheck", "originalPath: " + originalPath);
+        Log.d("DBPathCheck", "interiorPath: " + interiorPath);
+
+        // 1. 데이터베이스 정보 삽입
+        ContentValues values = new ContentValues();
+        values.put("database_name", databaseName);
+        values.put("original_path", originalPath);
+        values.put("interior_path", interiorPath);
+
+        long rowId = db.insert("databases_info", null, values);
+        if (rowId != -1) {
+            Log.d("FileExplorer", "Database info saved to SysOpsDB, row ID: " + rowId);
+
+            // 2. order_hierarchy에 데이터 삽입 (entity_type = "database"와 entity_id = database_id)
+            ContentValues orderHierarchyValues = new ContentValues();
+            orderHierarchyValues.put("entity_type", "database");
+            orderHierarchyValues.put("entity_id", rowId); // 삽입된 database_id를 사용
+            orderHierarchyValues.put("order_priority", 0); // 기본 값으로 0 설정
+
+            long orderHierarchyRowId = db.insert("order_hierarchy", null, orderHierarchyValues);
+            if (orderHierarchyRowId != -1) {
+                Log.d("FileExplorer", "Order hierarchy info saved, row ID: " + orderHierarchyRowId);
+            } else {
+                Log.e("FileExplorer", "Failed to insert order hierarchy info.");
+            }
+
+        } else {
+            Log.e("FileExplorer", "Failed to insert database info into SysOpsDB.");
+        }
+    }
+
+    public Pair<String, String> getPathsByDatabaseName(String databaseName) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(
+
+                "SELECT original_path, interior_path FROM databases_info WHERE d\natabase_name = ?",
+                new String[]{databaseName}
+        );
+
+        if (cursor.moveToFirst()) {
+            String originalPath = cursor.getString(0);
+            String interiorPath = cursor.getString(1);
+            cursor.close();
+            return new Pair<>(originalPath, interiorPath);
+        }
+
+        cursor.close();
+        return null; // 또는 예외 처리 가능
+    }
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // Handle database upgrades

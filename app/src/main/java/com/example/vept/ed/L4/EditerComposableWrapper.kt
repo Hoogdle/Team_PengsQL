@@ -7,6 +7,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.vept.Home
+import com.example.vept.MainDesignViewModel
+import com.example.vept.pl.L4.Diagram
+import com.example.vept.pl.L4.MainDesign
+import com.example.vept.pl.L4.PlannerDiagramViewModel
 
 object EditerComposableWrapper {
     @JvmStatic
@@ -15,13 +20,26 @@ object EditerComposableWrapper {
         mainViewModel: EditerMainViewModel,
         cliViewModel: EditSqlCliViewModel,
         listViewModel: EditTableListViewModel,
-        modViewModel: EditTableModViewModel
+        modViewModel: EditTableModViewModel,
+        homeViewModel: MainDesignViewModel,
+        diagramViewModel: PlannerDiagramViewModel
     ) {
         composeView.setContent {
             val navController = rememberNavController()
             NavHost(navController = navController, startDestination = "main") {
                 composable("main") {
                     EditerMainDesign(mainViewModel, navController)
+                }
+
+                composable("diagram"){
+                    MainDesign(diagramViewModel)
+                }
+                composable("home"){
+                    Home(viewModel = homeViewModel)
+                }
+                // 임시로 ai navigator 생성
+                composable("ai"){
+                    EditMCPsDesign(navController)
                 }
                 composable("sql?name={name}&type={type}",
                     arguments = listOf(

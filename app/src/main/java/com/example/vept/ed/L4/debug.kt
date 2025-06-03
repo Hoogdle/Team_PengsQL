@@ -12,30 +12,25 @@ import androidx.navigation.NavHostController
 
 @Composable //sql, list, mod -> main 이동
 fun ReturnToMainButton(navController: NavHostController) {
-    Box(
+
+    Button(
+        onClick = {
+            navController.navigate("main") {
+                popUpTo("main") { inclusive = true }
+            }
+        },
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.Red,
+            contentColor = Color.White
+        ),
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 10.dp),
-        contentAlignment = Alignment.TopCenter
+            .width(100.dp)
+            .height(36.dp),
+        shape = MaterialTheme.shapes.medium
     ) {
-        Button(
-            onClick = {
-                navController.navigate("main") {
-                    popUpTo("main") { inclusive = true }
-                }
-            },
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Red,
-                contentColor = Color.White
-            ),
-            modifier = Modifier
-                .width(100.dp)
-                .height(36.dp),
-            shape = MaterialTheme.shapes.medium
-        ) {
-            Text("메인", fontSize = 12.sp)
-        }
+        Text("메인", fontSize = 12.sp)
     }
+
 }
 
 @Composable //main -> sql, list, mod 이동
@@ -44,8 +39,10 @@ fun DebugDropdown(navController: NavHostController) {
 
     Box(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 10.dp),
+            .offset(
+                y = 10.dp
+            )
+        ,
         contentAlignment = Alignment.TopCenter
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {

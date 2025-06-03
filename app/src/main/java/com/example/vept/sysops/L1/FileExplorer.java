@@ -9,8 +9,10 @@ import android.net.Uri;
 import android.provider.OpenableColumns;
 import android.util.Log;
 import androidx.activity.result.ActivityResultLauncher;
+import androidx.core.util.Pair;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,7 +22,7 @@ public class FileExplorer {
     private Context context;
     private ActivityResultLauncher<Intent> filePickerLauncher;
     private Uri selectedFileUri; // Uri 타입으로 변경
-    private SysOpsDB sysOpsDB;
+    private static SysOpsDB sysOpsDB;
 
     public FileExplorer(Context context, ActivityResultLauncher<Intent> filePickerLauncher) {
         this.context = context;
@@ -121,6 +123,9 @@ public class FileExplorer {
     // 데이터베이스 정보를 SysOpsDB에 저장
     private void saveDatabaseInfoToDB(String databaseName, String originalPath, String interiorPath) {
         SQLiteDatabase db = sysOpsDB.getWritableDatabase();
+        Log.d("DBPathCheck", "originalPath: " + originalPath);
+        Log.d("DBPathCheck", "interiorPath: " + interiorPath);
+
 
         // 1. 데이터베이스 정보 삽입
         ContentValues values = new ContentValues();
@@ -174,6 +179,38 @@ public class FileExplorer {
             }
         } else {
             Log.d("FileExplorer", "No file selected.");
+        }
+    }
+
+    public static void writeInternalDBToUri(Context context, String databaseName, Uri uri) {
+        try {
+            Pair<String, String> paths = sysOpsDB.getPathsByDatabaseName(databaseName);
+            if (paths == null) {
+                Log.e("FileExplorer", "No path info found for database: " + databaseName);
+                return;
+            }
+
+            String interiorPath = paths.second; // 내부 DB 경로
+            InputStream in = new FileInputStream(interiorPath);
+            OutputStream out = context.getContentResolver().openOutputStream(uri);
+
+            if (out == null) {
+                Log.e("FileExplorer", "OutputStream is null for URI: " + uri);
+                return;
+            }
+
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = in.read(buffer)) > 0) {
+                out.write(buffer, 0, length);
+            }
+
+            in.close();
+            out.close();
+
+            Log.d("FileExplorer", "DB successfully exported to: " + uri);
+        } catch (IOException e) {
+            Log.e("FileExplorer", "Error writing DB to URI", e);
         }
     }
 
