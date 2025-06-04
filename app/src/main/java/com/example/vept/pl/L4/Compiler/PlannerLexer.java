@@ -14,7 +14,7 @@ public class PlannerLexer {
             "PK",
             "NN",
             "UQ",
-            "CK",
+            "DF",
             "table"
     };
     public PlannerLexer(PlannerCompiler compiler) {

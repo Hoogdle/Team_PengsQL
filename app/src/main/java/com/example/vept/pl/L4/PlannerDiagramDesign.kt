@@ -1,83 +1,139 @@
 package com.example.vept.pl.L4
 
-import android.graphics.Matrix
-import android.util.Log
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
+import android.database.Cursor
+import android.net.Uri
+import android.provider.OpenableColumns
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.animateDp
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
-import androidx.compose.foundation.gestures.rememberTransformableState
-import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
-import androidx.compose.ui.graphics.drawscope.scale
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.scale
 import androidx.compose.ui.graphics.withSave
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material3.SmallFloatingActionButton
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.unit.toSize
 import com.example.vept.R
-import com.example.vept.ed.L4.DebugDropdown
-import com.example.vept.ed.L4.SelectDBTemplate
-import com.example.vept.ed.L4.SelectDBTitle
 import com.example.vept.ui.theme.BackGroundColor
 import com.example.vept.ui.theme.ButtonColor
 import com.example.vept.ui.theme.ButtonTextColor
 import com.example.vept.ui.theme.TitleColor
-import kotlin.math.round
+import java.util.ArrayList
+
 
 @Composable
 fun MainDesign(
     viewModel: PlannerDiagramViewModel
 ){
-    Column(
-        Modifier
-            .background(BackGroundColor)
-            .padding(top = 25.dp)
-    ) {
-//        ArrowAndMenu()
-        Spacer(modifier = Modifier.height(15.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+    val targetOffset = if (viewModel.getslid() == 1) {
+        0.dp
+    } else {
+        400.dp
+    }
+
+    val offsetY by animateDpAsState(
+        targetValue = targetOffset,
+        animationSpec = tween(300),
+        label = "offsetY"
+    )
+
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .background(BackGroundColor)) {
+        Column(
+            Modifier
+                .background(BackGroundColor)
+                .padding(top = 25.dp)
         ) {
-            SelectDiagramTitle("Diagram")
+            //ArrowAndMenu()
+
+            Spacer(modifier = Modifier.height(15.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                SelectDiagramTitle("Diagram")
+                Button(
+                    onClick = { viewModel.setslid(1) }
+                ) {
+                    Text("코드 편집기")
+                }
+            }
+            DrawCanvas(viewModel)
         }
-        DrawCanvas(viewModel)
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .offset(y = offsetY)
+                .fillMaxSize()
+                .imePadding()
+                .background(Color.White.copy(alpha = 0.78f))
+        ) {
+            Test(viewModel)
+        }
     }
 }
 
@@ -100,6 +156,142 @@ fun SelectDiagramTitle(
 }
 
 @Composable
+fun Test(
+    viewModel: PlannerDiagramViewModel
+){
+
+    val context = LocalContext.current
+    val textContent = remember { mutableStateOf(viewModel.getcode()) }
+    val configuration = LocalConfiguration.current
+    val screenWidthDp = configuration.screenWidthDp.dp
+    val screenHeightDp = configuration.screenHeightDp.dp
+    val errors by viewModel.errors
+
+    // SAF 파일 열기 Launcher
+    val readLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val uri = result.data?.data
+            if (uri != null) {
+                val fileName: String = getFileNameFromUri(context, uri)
+                if (fileName.endsWith(".dbia") == true) {
+                    val inputStream = context.contentResolver.openInputStream(uri)
+                    val content = inputStream?.bufferedReader().use { it?.readText() ?: "" }
+                    val hashlist = content.split('%')
+                    val hashslist = hashlist[0].split('\n')
+                    viewModel.resetHashPost()
+                    hashslist.forEach { it ->
+                        val ssmsg = it.split(':')
+                        if(!ssmsg[0].equals(""))
+                            viewModel.addHashPos(ssmsg[0], ssmsg[1].toFloat(),ssmsg[2].toFloat())
+                    }
+                    textContent.value = hashlist[1]
+                    viewModel.setcode(hashlist[1])
+                    viewModel.ontxtChange()
+                }
+            }
+        }
+    }
+
+    // SAF 저장하기 Launcher
+    val saveLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("application/octet-stream")
+    ) { uri: Uri? ->
+        var poshash: String = "";
+        viewModel.positionhash.map { it -> poshash += it.key + ":" + it.value.x + ":" + it.value.y + "\n" }
+        uri?.let {
+            context.contentResolver.openOutputStream(it)?.use { outputStream ->
+                outputStream.write((poshash + "%" + textContent.value).toByteArray())
+            }
+        }
+    }
+
+    Column(
+        modifier = Modifier.fillMaxSize()
+            .imePadding()
+    ) {
+        Row(modifier = Modifier
+            .padding(top = 16.dp, bottom = 1.dp)
+            .size(screenWidthDp, screenHeightDp * 4 / 5)
+            .imePadding()) {
+
+            // 텍스트 내용 입력/출력 필드
+            BasicTextField(
+                value = textContent.value,
+                onValueChange = { textContent.value = it; viewModel.setcode(it); viewModel.ontxtChange() },
+                textStyle = TextStyle(fontSize = 16.sp),
+                visualTransformation = CodeVisual(errors),
+                modifier = Modifier
+                    .fillMaxSize(),
+                decorationBox = { innerTextField ->
+                    // 레이아웃이나 배경 등 추가 가능
+                    Box(
+                        modifier = Modifier
+                            .padding(4.dp)
+                    ) {
+                        innerTextField()
+                    }
+                }
+            )
+        }
+        Row(modifier = Modifier
+            .weight(1f)
+            .padding(bottom = 1.dp)
+            .fillMaxWidth()
+            .imePadding()) {
+            Button(
+                onClick = { viewModel.setslid(0) },
+                modifier = Modifier.fillMaxWidth()
+                    .weight(1f),
+            ) {
+                Text("닫기")
+            }
+            // Read 버튼
+            Button(
+                onClick = {
+                    val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                        addCategory(Intent.CATEGORY_OPENABLE)
+                        type = "*/*"
+                    }
+                    readLauncher.launch(intent) },
+                modifier = Modifier.fillMaxWidth()
+                    .weight(1f)
+            ) {Text("Read (.dbia)")}
+            // Save 버튼
+            Button(
+                onClick = {saveLauncher.launch("saved_file.dbia") },
+                modifier = Modifier.fillMaxWidth()
+                    .weight(1f)
+            ) {Text("Save (.dbia)") }
+        }
+    }
+}
+
+
+
+fun getFileNameFromUri(
+    context: Context,
+    uri: Uri
+): String {
+    var result: String? = null
+    var cursor: Cursor? = null
+
+    try {
+        val projection = arrayOf(OpenableColumns.DISPLAY_NAME)
+        cursor = context.contentResolver.query(uri, projection, null, null, null)
+
+        if (cursor != null && cursor.moveToFirst()) {
+            val columnIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+            result = cursor.getString(columnIndex)
+        }
+    } finally {
+        cursor?.close()
+    }
+    return result!!
+}
+
+@Composable
 fun DrawCanvas(viewModel: PlannerDiagramViewModel) {
     var scale by remember { mutableStateOf(1f) }
     var offset by remember { mutableStateOf(Offset.Zero) }
@@ -115,7 +307,10 @@ fun DrawCanvas(viewModel: PlannerDiagramViewModel) {
                 detectTapGestures(
                     onLongPress = { inoffset ->
                         run {
-                            val getoff: Offset = Offset((inoffset.x - offset.x) / scale,(inoffset.y - offset.y) / scale)
+                            val getoff: Offset = Offset(
+                                (inoffset.x - offset.x) / scale,
+                                (inoffset.y - offset.y) / scale
+                            )
                             mdiagrams.forEachIndexed { index, dia ->
                                 run {
                                     if (dia.hitTest(getoff.x, getoff.y, 1f / 1f.toDp().value)) {
@@ -151,8 +346,15 @@ fun DrawCanvas(viewModel: PlannerDiagramViewModel) {
 
                         if (moveInd != -1) {
                             val newOffset =
-                                Offset(mdiagrams[moveInd].x.dp.toPx(), mdiagrams[moveInd].y.dp.toPx()) + dragAmount / scale
-                            viewModel.moveDiagram(moveInd, newOffset.x.toDp().value, newOffset.y.toDp().value)
+                                Offset(
+                                    mdiagrams[moveInd].x.dp.toPx(),
+                                    mdiagrams[moveInd].y.dp.toPx()
+                                ) + dragAmount / scale
+                            viewModel.moveDiagram(
+                                moveInd,
+                                newOffset.x.toDp().value,
+                                newOffset.y.toDp().value
+                            )
                         }
                     },
                     onDragEnd = {
