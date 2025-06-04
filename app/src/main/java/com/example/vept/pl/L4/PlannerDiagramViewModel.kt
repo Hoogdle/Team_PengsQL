@@ -63,10 +63,13 @@ class PlannerDiagramViewModel : ViewModel() {
     }
 
     fun ResetDiagram() {
-        _errors.value = listOf()
         dia.removeAll { true }
         edg.removeAll { true }
         lastselected = -1
+    }
+
+    fun ResetError() {
+        _errors.value = listOf()
     }
 
     fun adderror(ind: Int) {

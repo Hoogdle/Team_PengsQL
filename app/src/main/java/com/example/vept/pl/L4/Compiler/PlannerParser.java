@@ -1,6 +1,7 @@
 package com.example.vept.pl.L4.Compiler;
 
 import android.renderscript.Int4;
+import android.util.Log;
 
 import com.example.vept.pl.L4.Field;
 import com.example.vept.pl.L4.PlannerDiagramViewModel;
@@ -69,7 +70,6 @@ public class PlannerParser {
         isError = true;
         if(isAlive) {
             viewModel.adderror(Lex.GetLine() - 1);
-            //Log.d("E", "Error! : " + Lex.GetLine());
         }
 
         isAlive = false;
@@ -85,12 +85,13 @@ public class PlannerParser {
 
     private void ShowRefError(int Line) {
         viewModel.adderror(Line - 1);
-        //Log.d("E", "Error! : " + Line);
         isError = true;
     }
 
     public void Start() {
         isError = false;
+        canRecovery = true;
+        viewModel.ResetError();
         TableList = new HashMap<>();
         FKeyList = new ArrayList<>();
         TableNameList = new ArrayList<>();
