@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.vept"
+    namespace = "com.pangsql.vept"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.vept"
+        applicationId = "com.pangsql.vept"
         minSdk = 30
         targetSdk = 35
         versionCode = 1
