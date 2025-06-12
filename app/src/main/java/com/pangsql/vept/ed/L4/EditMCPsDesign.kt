@@ -50,6 +50,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.pangsql.vept.R
 import com.pangsql.vept.ed.L2.EditDB
 import com.pangsql.vept.ui.other.ArrowAndTitle
@@ -69,6 +70,10 @@ fun EditMCPsDesign(
     viewModel: EditSqlCliViewModel,
     navController: NavHostController
 ){
+    val systemUiController = rememberSystemUiController()
+    systemUiController.setSystemBarsColor(
+        color = Color(216,224,227)
+    )
     val count = remember { mutableStateOf(0) }
 
     val storedInfo = remember { mutableStateListOf("안녕하세요. PengSQL AI assistant 입니다. 무엇을 도와드릴까요?") }
@@ -90,7 +95,6 @@ fun EditMCPsDesign(
         Column (
             Modifier
                 .background(BackGroundColor)
-                .padding(top = 25.dp)
         ){
             ArrowAndTitle(navController = navController, title = "PengSAI", destination = "main")
 
@@ -115,26 +119,26 @@ fun EditMCPsTemplate(
     val verticalScrollState = rememberScrollState()
     val cliResult by viewModel.getCliResult().observeAsState("")
 
-    if (cliResult.isNotBlank()) {
-        Column(
-            Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-                .background(Color(0xFF222222))
-        ) {
-            Text(
-                "SQL 실행 결과",
-                color = Color.Cyan,
-
-                modifier = Modifier.padding(bottom = 4.dp)
-            )
-            Text(
-                cliResult,
-                color = Color.White,
-
-            )
-        }
-    }
+//    if (cliResult.isNotBlank()) {
+//        Column(
+//            Modifier
+//                .fillMaxWidth()
+//                .padding(8.dp)
+//                .background(Color(0xFF222222))
+//        ) {
+//            Text(
+//                "SQL 실행 결과",
+//                color = Color.Cyan,
+//
+//                modifier = Modifier.padding(bottom = 4.dp)
+//            )
+//            Text(
+//                cliResult,
+//                color = Color.White,
+//
+//            )
+//        }
+//    }
     LaunchedEffect(storedInfo.size){
         verticalScrollState.animateScrollTo(verticalScrollState.maxValue)
     }
@@ -419,17 +423,16 @@ fun EditMCPsTextField(
                     storedInfo.add(tmpStore)
                     storedInfo.add("요청 처리 중 입니다..")
 
-                    // 🧠 Prompt 생성
-                    val promptCommand = "언제나 답변은 sqlite3 sql로 제공되어야 한다. 현재 db에 있는 테이블과 필드는 없을 수 있거나 혹은 다음과 같다."
+//                    val promptCommand = "언제나 답변은 sqlite3 sql로 제공되어야 한다. 현재 db에 있는 테이블과 필드는 없을 수 있거나 혹은 다음과 같다."
                     val dbSchema = finalDataSet.value
-                    val fullPrompt = listOf(promptCommand, dbSchema, tmpStore)
-                        .joinToString(separator = "\",\n\"", prefix = "[\"", postfix = "\"]")
+//                    val fullPrompt = listOf(promptCommand, dbSchema, tmpStore)
+//                        .joinToString(separator = "\",\n\"", prefix = "[\"", postfix = "\"]")
 
-                    Log.e("프롬프트", fullPrompt)
+//                    Log.e("프롬프트", fullPrompt)
 
                     runBlocking {
                         launch {
-                            val aiResponse = AiServer(prompt = fullPrompt, db = dbSchema).toString()
+                            val aiResponse = AiServer(prompt = tmpStore, db = dbSchema).toString()
                             storedInfo[storedInfo.size - 1] = aiResponse
 
                             viewModel.executeSQL(aiResponse)

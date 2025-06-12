@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.pangsql.vept.R
 
 import com.pangsql.vept.sysops.L1.FileExplorer
@@ -65,6 +66,10 @@ fun EditerMainDesign(
     viewModel: EditerMainViewModel,
     navController: NavHostController
 ) {
+    val systemUiController = rememberSystemUiController()
+    systemUiController.setSystemBarsColor(
+        color = Color(216,224,227)
+    )
     val databaseName = viewModel.databaseName
 
 
@@ -72,7 +77,6 @@ fun EditerMainDesign(
     Column(
         Modifier
             .background(BackGroundColor)
-            .padding(top = 25.dp)
     ) {
 
         ArrowAndMenuWithTitle(databaseName,navController, destination = "home")

@@ -78,6 +78,7 @@ import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.pangsql.vept.ui.other.ArrowAndMenuCLI
 
 @SuppressLint("UnrememberedMutableState")
@@ -86,6 +87,10 @@ fun EditSqlCliDesign(
     viewModel: EditSqlCliViewModel,
     navController: NavHostController
 ) {
+    val systemUiController = rememberSystemUiController()
+    systemUiController.setSystemBarsColor(
+        color = Color(216,224,227)
+    )
     val lineNo = remember { mutableStateOf(10) }
     val userInputs = remember { mutableListOf(
         mutableStateOf(""),
@@ -125,7 +130,7 @@ fun EditSqlCliDesign(
         Column(
             Modifier
                 .background(BackGroundColor)
-                .padding(top = 25.dp)
+                .padding(top = 0.dp)
                 .fillMaxSize()
         ) {
             ArrowAndMenuCLI(

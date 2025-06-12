@@ -18,6 +18,7 @@ import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,6 +28,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -53,11 +55,16 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material3.ButtonColors
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.sp
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.pangsql.vept.R
 import com.pangsql.vept.ui.theme.BackGroundColor
 import com.pangsql.vept.ui.theme.ButtonColor
 import com.pangsql.vept.ui.theme.ButtonTextColor
+import com.pangsql.vept.ui.theme.TableBackGroundColor
 import com.pangsql.vept.ui.theme.TitleColor
 
 
@@ -65,6 +72,10 @@ import com.pangsql.vept.ui.theme.TitleColor
 fun MainDesign(
     viewModel: PlannerDiagramViewModel
 ){
+    val systemUiController = rememberSystemUiController()
+    systemUiController.setSystemBarsColor(
+        color = Color(216,224,227)
+    )
     val targetOffset = if (viewModel.getslid() == 1) {
         0.dp
     } else {
@@ -82,8 +93,8 @@ fun MainDesign(
         .background(BackGroundColor)) {
         Column(
             Modifier
-                .background(BackGroundColor)
-                .padding(top = 25.dp)
+                .fillMaxSize()
+                .background(TableBackGroundColor)
         ) {
             //ArrowAndMenu()
 
@@ -94,7 +105,27 @@ fun MainDesign(
             ) {
                 SelectDiagramTitle("Diagram")
                 Button(
-                    onClick = { viewModel.setslid(1) }
+                    onClick = { viewModel.setslid(1) },
+                    contentPadding = PaddingValues(7.dp),
+                    modifier = Modifier
+                        .height(30.dp)
+                        .padding(
+                            start = 1.dp,
+                            end = 1.dp
+                        )
+                        .offset(x= -10.dp)
+                        .offset(y=3.dp)
+                    ,
+                    colors = ButtonColors(
+                        contentColor = ButtonTextColor,
+                        containerColor = ButtonColor,
+                        disabledContainerColor = ButtonColor,
+                        disabledContentColor = ButtonTextColor
+                    ),
+                    shape = RoundedCornerShape(
+                        topStart = 5.dp,
+                        topEnd = 5.dp
+                    )
                 ) {
                     Text("코드 편집기")
                 }
@@ -219,8 +250,23 @@ fun Test(
             .imePadding()) {
             Button(
                 onClick = { viewModel.setslid(0) },
-                modifier = Modifier.fillMaxWidth()
-                    .weight(1f),
+                contentPadding = PaddingValues(7.dp),
+                modifier = Modifier
+                    .height(30.dp)
+                    .padding(
+                        start = 5.dp,
+                        end = 5.dp
+                    )
+                    .fillMaxWidth()
+                    .weight(1f)
+                ,
+                colors = ButtonColors(
+                    contentColor = ButtonTextColor,
+                    containerColor = ButtonColor,
+                    disabledContainerColor = ButtonColor,
+                    disabledContentColor = ButtonTextColor
+                ),
+                shape = RoundedCornerShape(10.dp)
             ) {
                 Text("닫기")
             }
@@ -232,14 +278,44 @@ fun Test(
                         type = "*/*"
                     }
                     readLauncher.launch(intent) },
-                modifier = Modifier.fillMaxWidth()
+                contentPadding = PaddingValues(7.dp),
+                modifier = Modifier
+                    .height(30.dp)
+                    .padding(
+                        start = 5.dp,
+                        end = 5.dp
+                    )
+                    .fillMaxWidth()
                     .weight(1f)
+                ,
+                colors = ButtonColors(
+                    contentColor = ButtonTextColor,
+                    containerColor = ButtonColor,
+                    disabledContainerColor = ButtonColor,
+                    disabledContentColor = ButtonTextColor
+                ),
+                shape = RoundedCornerShape(10.dp)
             ) {Text("Read (.dbia)")}
             // Save 버튼
             Button(
                 onClick = {saveLauncher.launch("saved_file.dbia") },
-                modifier = Modifier.fillMaxWidth()
+                contentPadding = PaddingValues(7.dp),
+                modifier = Modifier
+                    .height(30.dp)
+                    .padding(
+                        start = 5.dp,
+                        end = 5.dp
+                    )
+                    .fillMaxWidth()
                     .weight(1f)
+                ,
+                colors = ButtonColors(
+                    contentColor = ButtonTextColor,
+                    containerColor = ButtonColor,
+                    disabledContainerColor = ButtonColor,
+                    disabledContentColor = ButtonTextColor
+                ),
+                shape = RoundedCornerShape(10.dp)
             ) {Text("Save (.dbia)") }
         }
     }
