@@ -29,6 +29,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.pangsql.vept.R
 import com.pangsql.vept.ui.theme.ButtonColor
 import com.pangsql.vept.ui.theme.ButtonTextColor
@@ -97,6 +98,10 @@ fun EditTableModOldDesign(
     name: String,
     type: String
 ) {
+//    val systemUiController = rememberSystemUiController()
+//    systemUiController.setSystemBarsColor(
+//        color = Color(216,224,227)
+//    )
     var tableName by remember { mutableStateOf(name) }
     var fields by remember { mutableStateOf(listOf<Field>()) }
 

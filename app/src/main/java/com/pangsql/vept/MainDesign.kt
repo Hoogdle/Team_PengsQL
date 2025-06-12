@@ -51,6 +51,9 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.pangsql.vept.ed.L4.EditerMain
 import com.pangsql.vept.pl.L4.PlannerMain
 
@@ -73,6 +76,10 @@ fun Home(
 ){
 
 
+    val systemUiController = rememberSystemUiController()
+    systemUiController.setSystemBarsColor(
+        color = Color(216,224,227)
+    )
 
     val context = LocalContext.current
 
@@ -109,7 +116,7 @@ fun Home(
                     onClick = {
                         
                         //Todo, 다이어그램 네비게이션 연결
-                        val intent = Intent(context, PlannerMain::class.java)
+                        val intent = Intent(context, PlannerMain::class.java,)
                         context.startActivity(intent)
                     }
                 )

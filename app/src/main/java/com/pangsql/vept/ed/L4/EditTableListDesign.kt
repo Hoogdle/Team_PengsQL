@@ -102,6 +102,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.pangsql.vept.ui.other.ArrowAndTitle
 import com.pangsql.vept.ui.theme.TextColor
 
@@ -111,6 +112,11 @@ fun EditTableListDesign(
     viewModel: EditTableListViewModel,
     navController: NavHostController
 ) {
+
+    val systemUiController = rememberSystemUiController()
+    systemUiController.setSystemBarsColor(
+        color = Color(216,224,227)
+    )
     val TableName = viewModel.getItemName() ?: "이름 없음"
     val ChartType = viewModel.getItemType() ?: "타입 없음"
     val isEditable = viewModel.getItemType() == "테이블"   // 0은 뷰
@@ -122,7 +128,6 @@ fun EditTableListDesign(
     Column (
         Modifier
             .background(BackGroundColor)
-            .padding(top = 25.dp)
     ){
         ArrowAndTitle(navController = navController, title = TableName, destination = "main")
 

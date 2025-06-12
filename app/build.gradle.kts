@@ -76,6 +76,5 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.kotlinx.serialization.json)
-
-
+    implementation ("com.google.accompanist:accompanist-systemuicontroller:0.27.0")
 }

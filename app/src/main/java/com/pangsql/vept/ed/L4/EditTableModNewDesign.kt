@@ -32,6 +32,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.pangsql.vept.R
 import com.pangsql.vept.ui.theme.ButtonColor
 import com.pangsql.vept.ui.theme.ButtonTextColor
@@ -88,6 +89,10 @@ fun EditTableModNewDesign(
     val interactionSource = remember { MutableInteractionSource() }
 
 
+//    val systemUiController = rememberSystemUiController()
+//    systemUiController.setSystemBarsColor(
+//        color = Color(216,224,227)
+//    )
     Column(
         modifier = Modifier
             .fillMaxSize()

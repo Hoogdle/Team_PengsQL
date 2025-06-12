@@ -1,8 +1,11 @@
 package com.pangsql.vept;
 
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.compose.ui.platform.ComposeView;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 
@@ -15,6 +18,7 @@ public class MainActivity extends AppCompatActivity {
 
         //initializePermissions();        // 권한 체크
 
+
         // ComposeView 생성
         ComposeView composeView = new ComposeView(this);
         setContentView(composeView);
@@ -22,7 +26,6 @@ public class MainActivity extends AppCompatActivity {
         // ViewModel 생성
         MainDesignViewModel viewModel = new ViewModelProvider(this).get(MainDesignViewModel.class);
         viewModel.loadDatabaseNames(this);
-
         // Kotlin의 정적 유틸리티 메서드 호출
         ComposableWrapper.setComposableContent(composeView, viewModel);
     }

@@ -1,11 +1,13 @@
 package com.pangsql.vept.ed.L4
 
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.pangsql.vept.Home
 import com.pangsql.vept.MainDesignViewModel
 import com.pangsql.vept.pl.L4.MainDesign
@@ -23,6 +25,10 @@ object EditerComposableWrapper {
         diagramViewModel: PlannerDiagramViewModel
     ) {
         composeView.setContent {
+            val systemUiController = rememberSystemUiController()
+            systemUiController.setSystemBarsColor(
+                color = Color(216,224,227)
+            )
             val navController = rememberNavController()
             NavHost(navController = navController, startDestination = "main") {
                 composable("main") {
