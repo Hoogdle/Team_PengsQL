@@ -50,6 +50,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.vept.ed.L4.AiServer
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.pangsql.vept.R
 import com.pangsql.vept.ed.L2.EditDB
@@ -61,6 +62,8 @@ import com.pangsql.vept.ui.theme.ButtonColor
 import com.pangsql.vept.ui.theme.HomeDBListColor
 import com.pangsql.vept.ui.theme.TextColor
 import com.pangsql.vept.ui.theme.UserTextBox
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -431,7 +434,7 @@ fun EditMCPsTextField(
 //                    Log.e("프롬프트", fullPrompt)
 
                     runBlocking {
-                        launch {
+                        CoroutineScope(Dispatchers.IO).launch {
                             val aiResponse = AiServer(prompt = tmpStore, db = dbSchema).toString()
                             storedInfo[storedInfo.size - 1] = aiResponse
 

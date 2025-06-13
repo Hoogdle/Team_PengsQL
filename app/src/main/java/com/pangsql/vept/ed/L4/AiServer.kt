@@ -1,11 +1,15 @@
-package com.pangsql.vept.ed.L4
+package com.example.vept.ed.L4
 
 import android.util.Log
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import org.json.JSONObject
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
+
+import kotlinx.serialization.json.Json
 
 @Serializable
 data class AiResult(
@@ -15,68 +19,51 @@ data class AiResult(
 suspend fun AiServer(
     prompt: String,
     db: String
-): String?{
-
+): String? = withContext(Dispatchers.IO) {
     val jsonObject = JSONObject()
     jsonObject.put("prompt", prompt)
     jsonObject.put("db", db)
 
-    Log.e("catch",prompt)
-    Log.e("catch",db)
+    Log.e("catch", prompt)
+    Log.e("catch", db)
+
     val jsonObjectString = jsonObject.toString()
 
     try {
-        val url = URL("https://fluent-marmoset-immensely.ngrok-free.app/AI") // edit1
-        val connection = url.openConnection() as java.net.HttpURLConnection
-        connection.doOutput = true // 서버로 보내기 위해 doOutPut 옵션 활성화
+        val url = URL("https://teaching-broadly-manatee.ngrok-free.app/AI")
+        val connection = url.openConnection() as HttpURLConnection
+        connection.doOutput = true
         connection.doInput = true
-        connection.requestMethod = "POST" // edit2 // or POST
+        connection.requestMethod = "POST"
 
-        Log.e("catch","1")
+        Log.e("catch", "1")
 
-        // 서버와 통신을 위하 코드는 아래으 url 참조
-        // https://johncodeos.com/post-get-put-delete-requests-with-httpurlconnection/
-        connection.setRequestProperty(
-            "Content-Type",
-            "application/json"
-        ) // The format of the content we're sending to the server
-        connection.setRequestProperty(
-            "Accept",
-            "application/json"
-        ) // The format of response we want to get from the server
+        connection.setRequestProperty("Content-Type", "application/json")
+        connection.setRequestProperty("Accept", "application/json")
 
         val outputStreamWriter = OutputStreamWriter(connection.outputStream)
         outputStreamWriter.write(jsonObjectString)
         outputStreamWriter.flush()
 
         if (connection.responseCode == HttpURLConnection.HTTP_OK) {
-
             val inputStream = connection.inputStream.bufferedReader().use { it.readText() }
-            Log.e("catch",  "ai result :" + inputStream)
+            Log.e("catch", "ai result: $inputStream")
 
-            // 일반적으로는 아래의 코드를 사용(parsing code)
-            // 근데 이상하게 오류가 생겨 수동 파싱 코드 사용
-            //val json = Json{ ignoreUnknownKeys = true }.decodeFromString<AiResult?>(inputStream) // edit3
-
-            // 수동 파싱
             val sepToken = "<#s#>"
-
-            // 1차 토큰 검증
             val sepTokenIndex = inputStream.indexOf(sepToken) + sepToken.length
             val startIndex = inputStream.indexOf(sepToken, sepTokenIndex) + sepToken.length
             val endIndex = inputStream.indexOf(sepToken, startIndex)
 
-            val result = inputStream.substring(startIndex,endIndex)
-
+            val result = inputStream.substring(startIndex, endIndex)
             Log.e("catch", result)
-            return result
+            return@withContext result
         } else {
-            Log.e("xxx","else")
-            return  null
+            Log.e("xxx", "else")
+            return@withContext null
         }
     } catch (e: Exception) {
-        Log.e("xxx","catch")
+        Log.e("xxx", "catch")
         e.printStackTrace()
-        return  "쿼리문에 관련된 정보만을 입력해주세요."
+        return@withContext "쿼리문에 관련된 정보만을 입력해주세요."
     }
 }
